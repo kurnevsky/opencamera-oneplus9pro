@@ -30,7 +30,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
     public int getNumberOfCameras() {
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         try {
-            return manager.getCameraIdList().length;
+            return 5;
         }
         catch(Throwable e) {
             // in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
@@ -48,7 +48,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
     public CameraController.Facing getFacing(int cameraId) {
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         try {
-            String cameraIdS = manager.getCameraIdList()[cameraId];
+            String cameraIdS = ((Integer) cameraId).toString();
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
             switch( characteristics.get(CameraCharacteristics.LENS_FACING) ) {
                 case CameraMetadata.LENS_FACING_FRONT:
@@ -77,7 +77,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         String description = null;
         try {
-            String cameraIdS = manager.getCameraIdList()[cameraId];
+            String cameraIdS = ((Integer) cameraId).toString();
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 
             switch( characteristics.get(CameraCharacteristics.LENS_FACING) ) {
@@ -197,7 +197,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
     public boolean allowCamera2Support(int cameraId) {
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         try {
-            String cameraIdS = manager.getCameraIdList()[cameraId];
+            String cameraIdS = ((Integer) cameraId).toString();
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
             //return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY);
             return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);

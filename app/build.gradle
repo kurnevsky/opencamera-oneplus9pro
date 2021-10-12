@@ -5,7 +5,7 @@ android {
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
-        applicationId "net.sourceforge.opencamera"
+        applicationId "com.oneplus.camera"
         minSdkVersion 15
         targetSdkVersion 30
 
