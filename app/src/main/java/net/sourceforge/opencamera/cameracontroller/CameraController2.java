@@ -2142,7 +2142,7 @@ public class CameraController2 extends CameraController {
         try {
             if( MyDebug.LOG )
                 Log.d(TAG, "get camera id list");
-            this.cameraIdS = manager.getCameraIdList()[cameraId];
+            this.cameraIdS = ((Integer) cameraId).toString();
             if( MyDebug.LOG )
                 Log.d(TAG, "about to open camera: " + cameraIdS);
             manager.openCamera(cameraIdS, myStateCallback, handler);
