@@ -194,8 +194,14 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
     }
     else {
         pixels[0] = in;
-        parameter_A[0] = parameter_A[mid_indx];
-        parameter_B[0] = parameter_B[mid_indx];
+        // Reading from the parameter_A1, parameter_B1 instead of the local arrays should be equivalent -
+        // but doing it this way fixes odd bug on some Galaxy devices (e.g., S10e) with Android 12 - HDR photos
+        // would come out black due to corrupt values in the local parameter_A, parameter_B arrays
+        // n.b., doesn't affect hdr_n()
+        //parameter_A[0] = parameter_A[mid_indx];
+        //parameter_B[0] = parameter_B[mid_indx];
+        parameter_A[0] = parameter_A1;
+        parameter_B[0] = parameter_B1;
     }
 
     // middle image is not offset
@@ -206,8 +212,11 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
     }
     else {
         pixels[2] = in;
-        parameter_A[2] = parameter_A[mid_indx];
-        parameter_B[2] = parameter_B[mid_indx];
+        // See note above about bug with some Galaxy devices and Android 12
+        //parameter_A[2] = parameter_A[mid_indx];
+        //parameter_B[2] = parameter_B[mid_indx];
+        parameter_A[2] = parameter_A1;
+        parameter_B[2] = parameter_B1;
     }
 
     float3 hdr = (float3){0.0f, 0.0f, 0.0f};
