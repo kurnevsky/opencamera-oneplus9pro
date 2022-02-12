@@ -77,7 +77,7 @@ public class LocationSupplier {
     }
 
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
-     *  privacy policy needs updating.
+     *  privacy policy or data privacy section needs updating.
      * @return Returns null if location not available.
      */
     public Location getLocation() {
@@ -85,7 +85,7 @@ public class LocationSupplier {
     }
 
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
-     *  privacy policy needs updating.
+     *  privacy policy or data privacy section needs updating.
      * @param locationInfo Optional class to return additional information about the location.
      * @return Returns null if location not available.
      */
@@ -172,6 +172,8 @@ public class LocationSupplier {
 
     /* Best to only call this from MainActivity.initLocation().
      * @return Returns false if location permission not available for either coarse or fine.
+     *         Important to only return false if we actually want/need to ask the user for location
+     *         permission!
      */
     boolean setupLocationListener() {
         if( MyDebug.LOG )
@@ -244,6 +246,9 @@ public class LocationSupplier {
         else if( !store_location ) {
             freeLocationListeners();
         }
+        // important to return true even if we didn't set up decide the location listeners - as
+        // returning false indicates to ask user for location permission (which we don't want to
+        // do if PreferenceKeys.LocationPreferenceKey preference isn't true)
         return true;
     }
 

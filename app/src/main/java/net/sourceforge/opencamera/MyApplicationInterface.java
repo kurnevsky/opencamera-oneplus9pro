@@ -260,7 +260,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
-     *  privacy policy needs updating.
+     *  privacy policy or data privacy section needs updating.
      *  Returns null if location not available.
      */
     @Override
@@ -269,7 +269,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
-     *  privacy policy needs updating.
+     *  privacy policy or data privacy section  needs updating.
      *  Returns null if location not available.
      */
     public Location getLocation(LocationSupplier.LocationInfo locationInfo) {
