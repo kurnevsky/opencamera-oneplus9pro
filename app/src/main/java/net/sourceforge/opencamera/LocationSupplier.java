@@ -129,8 +129,8 @@ public class LocationSupplier {
             // also check for not being null just in case - had a nullpointerexception on Google Play!
             if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
                 if( MyDebug.LOG ) {
-                    Log.d(TAG, "received location:");
-                    Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
+                    Log.d(TAG, "received location");
+                    // don't log location, in case of privacy!
                 }
                 this.location = location;
                 cacheLocation();
