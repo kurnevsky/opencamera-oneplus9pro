@@ -971,4 +971,8 @@
     <string name="preference_comment_ypr">Eigentliche Eulerwinkel speichern</string>
     <string name="preference_comment_ypr_summary">Speichern der drei Euler-Winkel (Drehlage des Geräts im EXIF Benutzerkommentar des Fotos (nur im JPEG-Format)</string>
 
+    <string name="preference_audio_control_none">Keine</string>
+    <string name="preference_audio_control_noise">Lautes Geräusch</string>
+    <string name="preference_audio_control_voice">Sprachkommando: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

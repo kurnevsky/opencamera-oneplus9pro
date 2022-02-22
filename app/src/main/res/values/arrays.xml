@@ -263,16 +263,6 @@
         <item>audio_mono</item>
         <item>audio_stereo</item>
     </string-array>
-    <string-array name="preference_audio_control_entries">
-        <item>None</item>
-        <item>Loud noise</item>
-        <item>Voice command: \"cheese\"</item> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
-    </string-array>
-    <string-array name="preference_audio_control_values">
-        <item>none</item>
-        <item>noise</item>
-        <item>voice</item>
-    </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>Local Time</item>
         <item>UTC (Zulu)</item>
@@ -998,5 +988,15 @@
     <string-array name="preference_zebra_stripes_background_color_values">
         <item>#ffffffff</item> <!-- White -->
         <item>#00000000</item> <!-- Transparent -->
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>@string/preference_audio_control_none</item>
+        <item>@string/preference_audio_control_noise</item>
+        <item>@string/preference_audio_control_voice</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
     </string-array>
 </resources>

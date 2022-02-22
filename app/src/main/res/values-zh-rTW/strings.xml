@@ -975,4 +975,8 @@
     <string name="preference_comment_ypr">儲存偏擺 (yaw)、俯仰 (pitch) 及翻滾 (roll)</string>
     <string name="preference_comment_ypr_summary">在照片的 Exif user comment 中儲存裝置的偏擺 (yaw)、俯仰 (pitch) 及翻滾 (roll)（只有在 JPEG 格式）</string>
 
+    <string name="preference_audio_control_none">無</string>
+    <string name="preference_audio_control_noise">大的聲音</string>
+    <string name="preference_audio_control_voice">音訊指令：「cheese」</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

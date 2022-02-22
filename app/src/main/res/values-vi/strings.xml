@@ -784,4 +784,9 @@
     <string name="preference_immersive_mode_navigation">Chỉ ẩn các nút điều hướng</string>
     <string name="preference_immersive_mode_gui">Ẩn giao diện người dùng</string>
     <string name="preference_immersive_mode_everything">Ẩn mọi thứ</string>
+
+    <string name="preference_audio_control_none">Không</string>
+    <string name="preference_audio_control_noise">Tiếng động lớn</string>
+    <string name="preference_audio_control_voice">Tiếng cheese</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

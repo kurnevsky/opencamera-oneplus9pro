@@ -242,16 +242,6 @@
         <item>audio_mono</item>
         <item>audio_stereo</item>
     </string-array>
-    <string-array name="preference_audio_control_entries">
-        <item>なし</item>
-        <item>音に反応</item>
-        <item>音声コマンド: \"チーズ\"</item> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
-    </string-array>
-    <string-array name="preference_audio_control_values">
-        <item>none</item>
-        <item>noise</item>
-        <item>voice</item>
-    </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>ローカルタイム</item>
         <item>UTC協定世界時</item>

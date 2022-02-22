@@ -508,4 +508,9 @@
     <string name="preference_immersive_mode_navigation">Приховати кнопки навігації</string>
     <string name="preference_immersive_mode_gui">Приховати GUI</string>
     <string name="preference_immersive_mode_everything">Приховати все</string>
+
+    <string name="preference_audio_control_none">Немає</string>
+    <string name="preference_audio_control_noise">Низький шум</string>
+    <string name="preference_audio_control_voice">Голосова команда: \"сир\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

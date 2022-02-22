@@ -554,4 +554,9 @@
     <string name="preference_immersive_mode_navigation">Skjul bare de virtuelle navigasjonsknappene</string>
     <string name="preference_immersive_mode_gui">Skjul grensesnittet</string>
     <string name="preference_immersive_mode_everything">Skjul alt</string>
+
+    <string name="preference_audio_control_none">Ingen</string>
+    <string name="preference_audio_control_noise">Høy støy</string>
+    <string name="preference_audio_control_voice">Stemmekommando: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

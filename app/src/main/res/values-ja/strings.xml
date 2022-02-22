@@ -860,4 +860,9 @@
     <string name="preference_immersive_mode_navigation">スクリーンボタンのみ隠す</string>
     <string name="preference_immersive_mode_gui">GUIを隠す</string>
     <string name="preference_immersive_mode_everything">すべてを隠す</string>
+
+    <string name="preference_audio_control_none">なし</string>
+    <string name="preference_audio_control_noise">音に反応</string>
+    <string name="preference_audio_control_voice">音声コマンド: \"チーズ\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

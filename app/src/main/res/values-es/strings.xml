@@ -598,4 +598,9 @@
     <string name="preference_immersive_mode_navigation">Sólo ocultar los botones de navegación en pantalla</string>
     <string name="preference_immersive_mode_gui">Ocultar interfaz de usuario</string>
     <string name="preference_immersive_mode_everything">Ocultar todo</string>
+
+    <string name="preference_audio_control_none">Ninguno</string>
+    <string name="preference_audio_control_noise">Ruido fuerte</string>
+    <string name="preference_audio_control_voice">Comando de voz: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

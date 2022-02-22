@@ -423,4 +423,9 @@
     <string name="preference_immersive_mode_navigation">Apenas ocultar os botões de navegação virtuais</string>
     <string name="preference_immersive_mode_gui">Ocultar interface</string>
     <string name="preference_immersive_mode_everything">Ocultar tudo</string>
+
+    <string name="preference_audio_control_none">Nenhum</string>
+    <string name="preference_audio_control_noise">Ruído alto</string>
+    <string name="preference_audio_control_voice">Comando de voz: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

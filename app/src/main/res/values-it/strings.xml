@@ -976,4 +976,8 @@
 
     <string name="array_seekbar_preference_seekbar">Barra per cambiare il valore attuale di preferenza</string>
 
+    <string name="preference_audio_control_none">Nessuno</string>
+    <string name="preference_audio_control_noise">Rumore forte</string>
+    <string name="preference_audio_control_voice">Comando vocale: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

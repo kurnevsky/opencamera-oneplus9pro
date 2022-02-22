@@ -974,4 +974,8 @@
     <string name="preference_comment_ypr">Сохранять связанную систему координат</string>
     <string name="preference_comment_ypr_summary">Сохранять связанную систему координат устройства в EXIF фото в комментарии пользователя (только для формата JPEG)</string>
 
+    <string name="preference_audio_control_none">Нет</string>
+    <string name="preference_audio_control_noise">Громкий шум</string>
+    <string name="preference_audio_control_voice">Голосовая команда: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>

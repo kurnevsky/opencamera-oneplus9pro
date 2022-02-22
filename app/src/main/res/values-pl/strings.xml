@@ -943,4 +943,8 @@
     <string name="centre_of_screen">w środku</string>
 
     <string name="high_speed">Duża prędkość</string> <!-- in the sense of high speed video frame rates -->
+
+    <string name="preference_audio_control_none">Wyłączone</string>
+    <string name="preference_audio_control_noise">Głośny dźwięk</string>
+    <string name="preference_audio_control_voice">Komenda głosowa: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
 </resources>

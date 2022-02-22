@@ -977,4 +977,9 @@
     <string name="preference_comment_ypr_summary">V uporabniško opombo Exif v fotografiji shrani odklon, naklon in nagib naprave (samo oblika JPEG)</string>
 
     <string name="array_seekbar_preference_seekbar">Iskalna vrstica za spremembo trenutne vrednosti nastavitve</string>
+
+    <string name="preference_audio_control_none">Brez</string>
+    <string name="preference_audio_control_noise">Glasen zvok</string>
+    <string name="preference_audio_control_voice">Glasovni ukaz: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+
 </resources>
