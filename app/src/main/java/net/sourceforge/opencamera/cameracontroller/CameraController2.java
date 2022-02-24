@@ -4070,7 +4070,7 @@ public class CameraController2 extends CameraController {
         imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
         //imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.YUV_420_888, 2);
         if( MyDebug.LOG ) {
-            Log.d(TAG, "created new imageReader: " + imageReader.toString());
+            Log.d(TAG, "created new imageReader: " + imageReader);
             Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
         }
         // It's intentional that we pass a handler on null, so the OnImageAvailableListener runs on the UI thread.
@@ -4082,7 +4082,7 @@ public class CameraController2 extends CameraController {
             // value for maxImages
             imageReaderRaw = ImageReader.newInstance(raw_size.getWidth(), raw_size.getHeight(), ImageFormat.RAW_SENSOR, max_raw_images);
             if( MyDebug.LOG ) {
-                Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
+                Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw);
                 Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
             }
             // see note above for imageReader.setOnImageAvailableListener for why we use a null handler
@@ -5926,7 +5926,7 @@ public class CameraController2 extends CameraController {
             try {
                 if( MyDebug.LOG ) {
                     if( imageReaderRaw != null ) {
-                        Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.toString());
+                        Log.d(TAG, "imageReaderRaw: " + imageReaderRaw);
                         Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
                     }
                     else {

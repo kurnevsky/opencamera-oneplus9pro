@@ -34,7 +34,6 @@
         <!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
             android:name="net.sourceforge.opencamera.MainActivity"
-            android:label="@string/app_name"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:clearTaskOnLaunch="true"
             android:exported="true"
