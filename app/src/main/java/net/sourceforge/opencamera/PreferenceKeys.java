@@ -170,6 +170,8 @@ public class PreferenceKeys {
 
     public static final String Camera2FakeFlashPreferenceKey = "preference_camera2_fake_flash";
 
+    public static final String Camera2DummyCaptureHackPreferenceKey = "preference_camera2_dummy_capture_hack";
+
     public static final String Camera2FastBurstPreferenceKey = "preference_camera2_fast_burst";
 
     public static final String Camera2PhotoVideoRecordingPreferenceKey = "preference_camera2_photo_video_recording";

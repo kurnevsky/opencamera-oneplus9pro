@@ -187,12 +187,19 @@ public class CameraController2 extends CameraController {
     private boolean continuous_burst_in_progress; // whether we're currently taking a continuous burst
     private boolean continuous_burst_requested_last_capture; // whether we've requested the last capture
 
+    // Whether to enable a workaround hack for some Galaxy devices - take an additional dummy photo
+    // when taking an expo/HDR burst, to avoid problem where manual exposure is ignored for the
+    // first image.
+    private boolean dummy_capture_hack = false;
+    //private boolean dummy_capture_hack = true; // test
+
     private boolean optimise_ae_for_dro = false;
     private boolean want_raw;
     //private boolean want_raw = true;
     private int max_raw_images;
     private android.util.Size raw_size;
     private ImageReader imageReaderRaw;
+    private OnImageAvailableListener onImageAvailableListener;
     private OnRawImageAvailableListener onRawImageAvailableListener;
     private PictureCallback picture_cb;
     private boolean jpeg_todo; // whether we are still waiting for JPEG images
@@ -1312,6 +1319,8 @@ public class CameraController2 extends CameraController {
     }
 
     private class OnImageAvailableListener implements ImageReader.OnImageAvailableListener {
+        private boolean skip_next_image = false; // whether to ignore the next image (used for dummy_capture_hack)
+
         @Override
         public void onImageAvailable(ImageReader reader) {
             if( MyDebug.LOG )
@@ -1320,6 +1329,14 @@ public class CameraController2 extends CameraController {
                 // in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
                 // or strange behaviour where an old image appears when the user next takes a photo
                 Log.e(TAG, "no picture callback available");
+                Image image = reader.acquireNextImage();
+                image.close();
+                return;
+            }
+            if( skip_next_image ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "skipping image");
+                skip_next_image = false;
                 Image image = reader.acquireNextImage();
                 image.close();
                 return;
@@ -1580,6 +1597,7 @@ public class CameraController2 extends CameraController {
     private class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
         private final Queue<CaptureResult> capture_results = new LinkedList<>();
         private final Queue<Image> images = new LinkedList<>();
+        private boolean skip_next_image = false; // whether to ignore the next image (used for dummy_capture_hack)
 
         void setCaptureResult(CaptureResult capture_result) {
             if( MyDebug.LOG )
@@ -1744,6 +1762,14 @@ public class CameraController2 extends CameraController {
                 Log.e(TAG, "no picture callback available");
                 Image this_image = reader.acquireNextImage();
                 this_image.close();
+                return;
+            }
+            if( skip_next_image ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "skipping image");
+                skip_next_image = false;
+                Image image = reader.acquireNextImage();
+                image.close();
                 return;
             }
             synchronized( background_camera_lock ) {
@@ -2210,6 +2236,7 @@ public class CameraController2 extends CameraController {
         if( imageReader != null ) {
             imageReader.close();
             imageReader = null;
+            onImageAvailableListener = null;
         }
         if( imageReaderRaw != null ) {
             imageReaderRaw.close();
@@ -3933,6 +3960,13 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
+    public void setDummyCaptureHack(boolean dummy_capture_hack) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setDummyCaptureHack: " + dummy_capture_hack);
+        this.dummy_capture_hack = dummy_capture_hack;
+    }
+
+    @Override
     public void setUseExpoFastBurst(boolean use_expo_fast_burst) {
         if( MyDebug.LOG )
             Log.d(TAG, "setUseExpoFastBurst: " + use_expo_fast_burst);
@@ -4076,7 +4110,7 @@ public class CameraController2 extends CameraController {
         // It's intentional that we pass a handler on null, so the OnImageAvailableListener runs on the UI thread.
         // If ever we want to change this on future, we should ensure that all image available listeners (JPEG+RAW) are
         // using the same handler/thread.
-        imageReader.setOnImageAvailableListener(new OnImageAvailableListener(), null);
+        imageReader.setOnImageAvailableListener(onImageAvailableListener = new OnImageAvailableListener(), null);
         if( want_raw && raw_size != null&& !previewIsVideoMode  ) {
             // unlike the JPEG imageReader, we can't read the data and close the image straight away, so we need to allow a larger
             // value for maxImages
@@ -4096,8 +4130,12 @@ public class CameraController2 extends CameraController {
         pending_burst_images.clear();
         pending_burst_images_raw.clear();
         pending_raw_image = null;
+        if( onImageAvailableListener != null ) {
+            onImageAvailableListener.skip_next_image = false;
+        }
         if( onRawImageAvailableListener != null ) {
             onRawImageAvailableListener.clear();
+            onRawImageAvailableListener.skip_next_image = false;
         }
         slow_burst_capture_requests = null;
         n_burst = 0;
@@ -6175,6 +6213,7 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "imageReader: " + imageReader.toString());
                     Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
                 }
+                int n_dummy_requests = 0;
 
                 CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
                 stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
@@ -6252,6 +6291,21 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "Base exposure time: " + base_exposure_time);
                     Log.d(TAG, "Min exposure time: " + min_exposure_time);
                     Log.d(TAG, "Max exposure time: " + max_exposure_time);
+                }
+
+                if( dummy_capture_hack && use_expo_fast_burst ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "add dummy capture");
+                    // dummy_capture_hack only supported for use_expo_fast_burst==true -
+                    // supporting for use_expo_fast_burst==false would complicate the code, and
+                    // these are only special case hacks anyway
+                    stillBuilder.setTag(null);
+                    requests.add( stillBuilder.build() );
+                    n_dummy_requests++;
+                    if( onImageAvailableListener != null )
+                        onImageAvailableListener.skip_next_image = true;
+                    if( onRawImageAvailableListener != null )
+                        onRawImageAvailableListener.skip_next_image = true;
                 }
 
                 // darker images
@@ -6386,7 +6440,7 @@ public class CameraController2 extends CameraController {
                 requests.add( stillBuilder.build() );
                 */
 
-                n_burst = requests.size();
+                n_burst = requests.size() - n_dummy_requests;
                 n_burst_total = n_burst;
                 n_burst_taken = 0;
                 n_burst_raw = raw_todo ? n_burst : 0;

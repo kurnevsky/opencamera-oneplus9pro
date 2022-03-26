@@ -837,6 +837,11 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public void setDummyCaptureHack(boolean dummy_capture_hack) {
+        // not supported for CameraController1
+    }
+
+    @Override
     public void setUseExpoFastBurst(boolean use_expo_fast_burst) {
         // not supported for CameraController1
     }

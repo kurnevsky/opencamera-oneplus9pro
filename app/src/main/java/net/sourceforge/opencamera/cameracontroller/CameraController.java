@@ -405,6 +405,11 @@ public abstract class CameraController {
      */
     public abstract void setExpoBracketingStops(double stops);
     public abstract void setUseExpoFastBurst(boolean use_expo_fast_burst);
+    /** Whether to enable a workaround hack for some Galaxy devices - take an additional dummy photo
+     *  when taking an expo/HDR burst, to avoid problem where manual exposure is ignored for the
+     *  first image.
+     */
+    public abstract void setDummyCaptureHack(boolean dummy_capture_hack);
     public abstract boolean isBurstOrExpo();
     /** If true, then the camera controller is currently capturing a burst of images.
      */

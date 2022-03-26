@@ -949,6 +949,11 @@ Camera2 API. A common issue is poor flash behaviour (either flash doesn't fire, 
 If so, enabling this option may help - this uses an alternative algorithm for flash (using the torch to simulate flash
 as a workaround). Note that this is enabled by default for Samsung devices.</p>
 
+<p><b>Enable dummy capture HDR/expo fix</b> - (Camera2 API only.) Enable this option if your device has problems taking photos
+in HDR or Exposure Bracketing photo modes, specifically if some expo images come out with the same exposures. This option
+takes an additional "dummy" image which may resolve such problems. Note that "Enable fast HDR/expo burst" (below) must
+be enabled for this option to have an effect.</p>
+
 <p><b>Enable fast HDR/expo burst</b> - (Camera2 API only.) Disable this option if your device has problems taking photos
 in HDR or Exposure Bracketing photo modes (disabling this option will result in a longer delay between the photos being
 taken, but may give more stable behaviour if your device is having problems with this).</p>

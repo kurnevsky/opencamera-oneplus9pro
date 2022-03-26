@@ -371,6 +371,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public boolean useCamera2DummyCaptureHack() {
+        return false;
+    }
+
+    @Override
     public boolean useCamera2FakeFlash() {
         return false;
     }

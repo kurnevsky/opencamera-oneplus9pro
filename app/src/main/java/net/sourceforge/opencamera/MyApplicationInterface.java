@@ -1752,6 +1752,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
+    public boolean useCamera2DummyCaptureHack() {
+        return sharedPreferences.getBoolean(PreferenceKeys.Camera2DummyCaptureHackPreferenceKey, false);
+    }
+
+    @Override
     public boolean useCamera2FastBurst() {
         return sharedPreferences.getBoolean(PreferenceKeys.Camera2FastBurstPreferenceKey, true);
     }

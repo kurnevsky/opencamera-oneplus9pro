@@ -6202,6 +6202,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.d(TAG, "enable_sound? " + enable_sound);
             camera_controller.enableShutterSound(enable_sound);
             if( using_android_l ) {
+                boolean camera2_dummy_capture_hack = applicationInterface.useCamera2DummyCaptureHack();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "camera2_dummy_capture_hack? " + camera2_dummy_capture_hack);
+                camera_controller.setDummyCaptureHack( camera2_dummy_capture_hack );
+
                 boolean use_camera2_fast_burst = applicationInterface.useCamera2FastBurst();
                 if( MyDebug.LOG )
                     Log.d(TAG, "use_camera2_fast_burst? " + use_camera2_fast_burst);

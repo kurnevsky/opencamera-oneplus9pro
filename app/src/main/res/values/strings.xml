@@ -990,6 +990,9 @@
     <string name="preference_audio_control_noise">Loud noise</string>
     <string name="preference_audio_control_voice">Voice command: \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
 
+    <string name="preference_camera2_dummy_capture_hack">Enable dummy capture HDR/expo fix</string>
+    <string name="preference_camera2_dummy_capture_hack_summary">Try enabling this if your device has problems when taking photos with HDR or Expo photo modes (if expo images come out with same exposures). Only relevant if fast HDR/expo option below is also enabled.</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy" translatable="false">Privacy policy</string>
