@@ -51,6 +51,7 @@ public class DeviceScanner extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_LOCATION_PERMISSIONS = 2;
+    private static final int REQUEST_BLUETOOTHSCANCONNECT_PERMISSIONS = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,15 +105,71 @@ public class DeviceScanner extends AppCompatActivity {
         });
     }
 
-    private void startScanning() {
+    /** Returns whether we can use the new Android 12 permissions for bluetooth (BLUETOOTH_SCAN,
+     *  BLUETOOTH_CONNECT) - if so, we should use these and NOT location permissions.
+     *  See https://developer.android.com/guide/topics/connectivity/bluetooth/permissions .
+     */
+    static boolean useAndroid12BluetoothPermissions() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
 
+    private void checkBluetoothEnabled() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkBluetoothEnabled");
+        // BLUETOOTH_CONNECT permission is needed for BluetoothAdapter.ACTION_REQUEST_ENABLE.
+        // Callers should have already checked for bluetooth permission, but we have this check
+        // just in case - and also to avoid the Android lint error that we'd get.
+        if( useAndroid12BluetoothPermissions() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "check for bluetooth connect permission");
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth connect permission not granted!");
+                return;
+            }
+        }
+        if( !bluetoothAdapter.isEnabled() ) {
+            // fire an intent to display a dialog asking the user to grant permission to enable Bluetooth
+            // n.b., on Android 12 need BLUETOOTH_CONNECT permission for this
+            if( MyDebug.LOG )
+                Log.d(TAG, "request to enable bluetooth");
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+    }
+
+    private void startScanning() {
         if( MyDebug.LOG )
             Log.d(TAG, "Start scanning");
 
-        if( !bluetoothAdapter.isEnabled() ) {
-            // fire an intent to display a dialog asking the user to grant permission to enable Bluetooth
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        // In real life most of bluetooth LE devices associated with location, so without this
+        // permission the sample shows nothing in most cases
+        // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
+        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
+        // Update: on Android 12+, we use the new bluetooth permissions instead of location permissions.
+        boolean has_permission = false;
+        if( useAndroid12BluetoothPermissions() ) {
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+                    &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+            ) {
+                has_permission = true;
+            }
+        }
+        else {
+            String permission_needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION;
+
+            int permissionCoarse = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                    ContextCompat
+                            .checkSelfPermission(this, permission_needed) :
+                    PackageManager.PERMISSION_GRANTED;
+
+            if( permissionCoarse == PackageManager.PERMISSION_GRANTED ) {
+                has_permission = true;
+            }
+        }
+
+        if( has_permission ) {
+            checkBluetoothEnabled();
         }
 
         leDeviceListAdapter = new LeDeviceListAdapter();
@@ -120,27 +177,20 @@ public class DeviceScanner extends AppCompatActivity {
         ListView list = findViewById(R.id.list);
         list.setAdapter(leDeviceListAdapter);
 
-        // In real life most of bluetooth LE devices associated with location, so without this
-        // permission the sample shows nothing in most cases
-        // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
-        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
-        String permission_needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION;
-        int permissionCoarse = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                ContextCompat
-                        .checkSelfPermission(this, permission_needed) :
-                PackageManager.PERMISSION_GRANTED;
-
-        if( permissionCoarse == PackageManager.PERMISSION_GRANTED ) {
+        if( has_permission ) {
             scanLeDevice(true);
         }
         else {
-            askForLocationPermission();
+            askForDeviceScannerPermission();
         }
     }
 
-    private void askForLocationPermission() {
+    /** Request permissions needed for bluetooth (BLUETOOTH_SCAN and BLUETOOTH_CONNECT on Android
+     *  12+, else location permission).
+     */
+    private void askForDeviceScannerPermission() {
         if( MyDebug.LOG )
-            Log.d(TAG, "askForLocationPermission");
+            Log.d(TAG, "askForDeviceScannerPermission");
         // n.b., we only need ACCESS_COARSE_LOCATION, but it's simpler to request both to be consistent with Open Camera's
         // location permission requests in PermissionHandler. If we only request ACCESS_COARSE_LOCATION here, and later the
         // user enables something that needs ACCESS_FINE_LOCATION, Android ends up showing the "rationale" dialog - and once
@@ -150,21 +200,68 @@ public class DeviceScanner extends AppCompatActivity {
         // explicitly in the AndroidManifest.xml, otherwise the dialog to request permission is never shown (and the permission
         // is denied automatically).
         // Update: on Android 10+, ACCESS_FINE_LOCATION is needed anyway: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
-        if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
-                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
-            // Show an explanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
-            showRequestLocationPermissionRationale();
+        // Update: on Android 12+, we use the new bluetooth permissions instead of location permissions.
+        if( useAndroid12BluetoothPermissions() ) {
+            if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BLUETOOTH_SCAN) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BLUETOOTH_CONNECT) ) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                showRequestBluetoothScanConnectPermissionRationale();
+            }
+            else {
+                // Can go ahead and request the permission
+                if( MyDebug.LOG )
+                    Log.d(TAG, "requesting bluetooth scan/connect permissions...");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        REQUEST_BLUETOOTHSCANCONNECT_PERMISSIONS);
+            }
         }
         else {
-            // Can go ahead and request the permission
-            if( MyDebug.LOG )
-                Log.d(TAG, "requesting location permissions...");
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQUEST_LOCATION_PERMISSIONS);
+            if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                showRequestLocationPermissionRationale();
+            }
+            else {
+                // Can go ahead and request the permission
+                if( MyDebug.LOG )
+                    Log.d(TAG, "requesting location permissions...");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                        REQUEST_LOCATION_PERMISSIONS);
+            }
         }
+    }
+
+    private void showRequestBluetoothScanConnectPermissionRationale() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "showRequestBluetoothScanConnectPermissionRationale");
+        if( !useAndroid12BluetoothPermissions() ) {
+            // just in case!
+            Log.e(TAG, "shouldn't be requesting bluetooth scan/connect permissions!");
+            return;
+        }
+
+        String [] permissions = new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT};
+        int message_id = R.string.permission_rationale_bluetooth_scan_connect;
+
+        final String [] permissions_f = permissions;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.permission_rationale_title)
+                .setMessage(message_id)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.ok, null)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "requesting permission...");
+                        ActivityCompat.requestPermissions(DeviceScanner.this, permissions_f, REQUEST_BLUETOOTHSCANCONNECT_PERMISSIONS);
+                    }
+                }).show();
     }
 
     private void showRequestLocationPermissionRationale() {
@@ -202,18 +299,34 @@ public class DeviceScanner extends AppCompatActivity {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        //noinspection SwitchStatementWithTooFewBranches
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "location permission granted");
+                    checkBluetoothEnabled();
                     scanLeDevice(true);
                 }
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "location permission denied");
                 }
+
+                break;
+            }
+            case REQUEST_BLUETOOTHSCANCONNECT_PERMISSIONS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "bluetooth scan/connect permission granted");
+                    checkBluetoothEnabled();
+                    scanLeDevice(true);
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "bluetooth scan/connect permission denied");
+                }
+
+                break;
             }
         }
     }
@@ -288,6 +401,20 @@ public class DeviceScanner extends AppCompatActivity {
     private void scanLeDevice(final boolean enable) {
         if( MyDebug.LOG )
             Log.d(TAG, "scanLeDevice: " + enable);
+
+        // BLUETOOTH_SCAN permission is needed for bluetoothAdapter.startLeScan and
+        // bluetoothAdapter.stopLeScan. Callers should have already checked for bluetooth
+        // permission, but we have this check just in case - and also to avoid the Android lint
+        // error that we'd get.
+        if( useAndroid12BluetoothPermissions() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "check for bluetooth scan permission");
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth scan permission not granted!");
+                return;
+            }
+        }
+
         if( enable ) {
             // stop scanning after certain time
             bluetoothHandler.postDelayed(new Runnable() {
@@ -295,9 +422,10 @@ public class DeviceScanner extends AppCompatActivity {
                 public void run() {
                     if( MyDebug.LOG )
                         Log.d(TAG, "stop scanning after delay");
-                    is_scanning = false;
+                    /*is_scanning = false;
                     bluetoothAdapter.stopLeScan(mLeScanCallback);
-                    invalidateOptionsMenu();
+                    invalidateOptionsMenu();*/
+                    scanLeDevice(false);
                 }
             }, 10000);
 
@@ -364,12 +492,32 @@ public class DeviceScanner extends AppCompatActivity {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            // BLUETOOTH_CONNECT permission is needed for device.getName. In theory we shouldn't
+            // have added to this list if bluetooth permission not available, but we have this
+            // check just in case - and also to avoid the Android lint error that we'd get.
+            boolean has_bluetooth_scan_permission = true;
+            if( useAndroid12BluetoothPermissions() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "check for bluetooth connect permission");
+                if( ContextCompat.checkSelfPermission(DeviceScanner.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                    has_bluetooth_scan_permission = false;
+                }
+            }
+
             BluetoothDevice device = mLeDevices.get(i);
-            final String deviceName = device.getName();
-            if( deviceName != null && deviceName.length() > 0 )
-                viewHolder.deviceName.setText(deviceName);
-            else
-                viewHolder.deviceName.setText(R.string.unknown_device);
+
+            if( !has_bluetooth_scan_permission ) {
+                Log.e(TAG, "bluetooth connect permission not granted!");
+                viewHolder.deviceName.setText(R.string.unknown_device_no_permission);
+            }
+            else {
+                final String deviceName = device.getName();
+                if( deviceName != null && deviceName.length() > 0 )
+                    viewHolder.deviceName.setText(deviceName);
+                else
+                    viewHolder.deviceName.setText(R.string.unknown_device);
+            }
+
             viewHolder.deviceAddress.setText(device.getAddress());
 
             return view;

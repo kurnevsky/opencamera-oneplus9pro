@@ -307,7 +307,7 @@
     <string name="permission_rationale_storage">Storage read/write permission is required to save resultant files such as photos or videos</string>
     <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio, as well as use the \"Audio control\" options</string>
     <string name="permission_rationale_location">Location permission is required for geotagging (storing location data in
-        photos and videos). Location permission is also required for connecting to Bluetooth LE remote control devices.</string>
+        photos and videos). Location permission is also required (at least for Android 11 and earlier) for connecting to Bluetooth LE remote control devices.</string>
 
     <string name="preference_category_photo_debugging">Debugging options</string>
     <string name="preference_category_video_debugging">Debugging options</string>
@@ -993,6 +993,9 @@
     <string name="preference_camera2_dummy_capture_hack">Enable dummy capture HDR/expo fix</string>
     <string name="preference_camera2_dummy_capture_hack_summary">Try enabling this if your device has problems when taking photos with HDR or Expo photo modes (if expo images come out with same exposures). Only relevant if fast HDR/expo option below is also enabled.</string>
 
+    <string name="permission_rationale_bluetooth_scan_connect">Bluetooth scan/connect permissions are required for discovering and connecting to Bluetooth LE remote control devices.</string>
+    <string name="unknown_device_no_permission">Unknown device (bluetooth connect permission not available)</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy" translatable="false">Privacy policy</string>
@@ -1008,8 +1011,9 @@
         &lt;br/&gt;Location permission is requested in order to deliver the optional geotagging features (for photos and videos,
         including stamp and subtitles options).
         When relevant option(s) are enabled, your device location will be stored in photo/video/subtitle files.
-        Location permission is also requested in order to connect to Bluetooth remote control devices.
-        Bluetooth permission is used to allow the optional feature to enable Bluetooth remote control devices.
+        &lt;br/&gt;Bluetooth permissions are used to allow the optional feature to discover and connect to Bluetooth LE remote control devices;
+        the Bluetooth remote control feature also requires location permission (on Android 11 or earlier) or
+        Nearby Devices permission (on Android 12 or later).
         &lt;br/&gt;Resultant data such as photos or videos can be shared with
         other apps if you use the share option in Open Camera, or when Open Camera is called by
         another app on your device, or when you use the Storage Access Framework option to save

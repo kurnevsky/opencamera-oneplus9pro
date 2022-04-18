@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.remotecontrol;
 
 import net.sourceforge.opencamera.MyDebug;
 
+import android.Manifest;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -14,11 +15,14 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -92,10 +96,25 @@ public class BluetoothLeService extends Service {
             return;
         }
 
+        // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+        if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth scan permission not granted!");
+                return;
+            }
+        }
+
         // Stops scanning after a pre-defined scan period.
         bluetoothHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+                if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+                    if( ContextCompat.checkSelfPermission(BluetoothLeService.this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ) {
+                        Log.e(TAG, "bluetooth scan permission not granted!");
+                        return;
+                    }
+                }
                 bluetoothAdapter.stopLeScan(null);
             }
         }, 10000);
@@ -118,7 +137,20 @@ public class BluetoothLeService extends Service {
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "Connected to GATT server, call discoverServices()");
                 }
-                bluetoothGatt.discoverServices();
+
+                // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+                boolean has_bluetooth_permission = true;
+                if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+                    if( ContextCompat.checkSelfPermission(BluetoothLeService.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                        Log.e(TAG, "bluetooth scan permission not granted!");
+                        has_bluetooth_permission = false;
+                    }
+                }
+
+                if( has_bluetooth_permission ) {
+                    bluetoothGatt.discoverServices();
+                }
+
                 currentDepth = -1;
                 currentTemp = -1;
 
@@ -384,6 +416,13 @@ public class BluetoothLeService extends Service {
             return false;
         }
 
+        // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+        if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth scan permission not granted!");
+                return false;
+            }
+        }
 
         // test code for infinite looping, seeing if this runs in background:
         /*if( address.equals("undefined") ) {
@@ -440,6 +479,15 @@ public class BluetoothLeService extends Service {
         if( bluetoothGatt == null ) {
             return;
         }
+
+        // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+        if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth scan permission not granted!");
+                return;
+            }
+        }
+
         bluetoothGatt.close();
         bluetoothGatt = null;
     }
@@ -454,6 +502,14 @@ public class BluetoothLeService extends Service {
             if( MyDebug.LOG )
                 Log.d(TAG, "bluetoothGatt is null");
             return;
+        }
+
+        // Check for Android 12 Bluetooth permission just in case (and for Android lint error)
+        if( DeviceScanner.useAndroid12BluetoothPermissions() ) {
+            if( ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ) {
+                Log.e(TAG, "bluetooth scan permission not granted!");
+                return;
+            }
         }
 
         String uuid = characteristic.getUuid().toString();
