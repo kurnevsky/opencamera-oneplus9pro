@@ -5290,7 +5290,7 @@ public class CameraController2 extends CameraController {
             }
 
             class MyStateCallback extends CameraCaptureSession.StateCallback {
-                private boolean callback_done; // must sychronize on this and notifyAll when setting to true
+                private boolean callback_done; // must synchronize on this and notifyAll when setting to true
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     if( MyDebug.LOG ) {
