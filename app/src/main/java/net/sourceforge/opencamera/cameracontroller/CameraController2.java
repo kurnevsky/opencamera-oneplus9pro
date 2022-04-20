@@ -445,11 +445,11 @@ public class CameraController2 extends CameraController {
             /*builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
             builder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
             builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
-            if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_GAMMA_VALUE);
                 builder.set(CaptureRequest.TONEMAP_GAMMA, 5.0f);
             }*/
-            /*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ) {
+            /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
                 builder.set(CaptureRequest.CONTROL_POST_RAW_SENSITIVITY_BOOST, 0);
             }*/
             /*builder.set(CaptureRequest.CONTROL_EFFECT_MODE, CaptureRequest.CONTROL_EFFECT_MODE_OFF);
@@ -474,7 +474,7 @@ public class CameraController2 extends CameraController {
                     }
                 }
             }*/
-            /*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+            /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_PRESET_CURVE);
                 builder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CaptureRequest.TONEMAP_PRESET_CURVE_SRGB);
             }*/
@@ -487,7 +487,7 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "edge_mode: " + (edge_mode==null ? "null" : edge_mode));
                     Integer cc_mode = builder.get(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE);
                     Log.d(TAG, "cc_mode: " + (cc_mode==null ? "null" : cc_mode));
-                    /*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ) {
+                    /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
                         Integer raw_sensitivity_boost = builder.get(CaptureRequest.CONTROL_POST_RAW_SENSITIVITY_BOOST);
                         Log.d(TAG, "raw_sensitivity_boost: " + (raw_sensitivity_boost==null ? "null" : raw_sensitivity_boost));
                     }*/
@@ -2539,7 +2539,7 @@ public class CameraController2 extends CameraController {
 
         android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
         camera_features.picture_sizes = new ArrayList<>();
-        if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
             android.util.Size [] camera_picture_sizes_hires = configs.getHighResolutionOutputSizes(ImageFormat.JPEG);
             if( camera_picture_sizes_hires != null ) {
                 for(android.util.Size camera_size : camera_picture_sizes_hires) {
@@ -6002,7 +6002,7 @@ public class CameraController2 extends CameraController {
                 }
                 //stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                 //stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-                if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ) {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
                     // unclear why we wouldn't want to request ZSL
                     // this is also required to enable HDR+ on Google Pixel devices when using Camera2: https://opensource.google.com/projects/pixelvisualcorecamera
                     stillBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
