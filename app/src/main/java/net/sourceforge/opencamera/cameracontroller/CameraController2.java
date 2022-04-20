@@ -8205,7 +8205,10 @@ public class CameraController2 extends CameraController {
                 }
             }
 
+            callCheckImagesCompleted();
+        }
 
+        private void callCheckImagesCompleted() {
             // Important that we only call the picture onCompleted callback after we've received the capture request, so
             // we need to check if we already received all the images.
             // Also needs to be run on UI thread.
