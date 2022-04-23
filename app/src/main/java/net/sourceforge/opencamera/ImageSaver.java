@@ -3669,7 +3669,7 @@ public class ImageSaver extends Thread {
         // So now hopefully fixed properly...
         // Note, this problem also occurs on OnePlus 3T and Gallery ICS, if we don't have this function called
         SimpleDateFormat date_fmt = new SimpleDateFormat("yyyy:MM:dd", Locale.US);
-        date_fmt.setTimeZone(TimeZone.getTimeZone("UTC")); // needs to be UTC time
+        date_fmt.setTimeZone(TimeZone.getTimeZone("UTC")); // needs to be UTC time for the GPS datetime tags
         String datestamp = date_fmt.format(current_date);
 
         SimpleDateFormat time_fmt = new SimpleDateFormat("HH:mm:ss", Locale.US);
