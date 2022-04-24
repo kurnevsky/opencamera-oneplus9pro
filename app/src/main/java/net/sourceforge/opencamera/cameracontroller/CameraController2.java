@@ -5412,6 +5412,7 @@ public class CameraController2 extends CameraController {
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "texture: " + texture);
                     Log.d(TAG, "preview_surface: " + preview_surface);
+                    Log.d(TAG, "handler: " + handler);
                 }
             }
             if( MyDebug.LOG ) {
