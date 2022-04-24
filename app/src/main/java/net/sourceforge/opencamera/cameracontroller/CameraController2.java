@@ -1858,7 +1858,7 @@ public class CameraController2 extends CameraController {
         final CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 
         class MyStateCallback extends CameraDevice.StateCallback {
-            boolean callback_done; // must sychronize on this and notifyAll when setting to true
+            boolean callback_done; // must synchronize on this and notifyAll when setting to true
             boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
             @Override
             public void onOpened(@NonNull CameraDevice cam) {
