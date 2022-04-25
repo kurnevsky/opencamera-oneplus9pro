@@ -493,7 +493,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
             int display_orientation = camera_controller.getDisplayOrientation();
             if( MyDebug.LOG ) {
-                Log.d(TAG, "orientation of display relative to camera orientaton: " + display_orientation);
+                Log.d(TAG, "orientation of display relative to camera orientation: " + display_orientation);
             }
             camera_to_preview_matrix.postRotate(display_orientation);
         }
@@ -506,8 +506,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             int degrees = getDisplayRotationDegrees();
             int result = (camera_controller.getCameraOrientation() - degrees + 360) % 360;
             if( MyDebug.LOG ) {
-                Log.d(TAG, "orientation of display relative to natural orientaton: " + degrees);
-                Log.d(TAG, "orientation of display relative to camera orientaton: " + result);
+                Log.d(TAG, "orientation of display relative to natural orientation: " + degrees);
+                Log.d(TAG, "orientation of display relative to camera orientation: " + result);
             }
             camera_to_preview_matrix.postRotate(result);
         }
@@ -8101,7 +8101,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     // of the device
                     int rotation_degrees = preview.getDisplayRotationDegrees();
 					/*if( MyDebug.LOG ) {
-						Log.d(TAG, "orientation of display relative to natural orientaton: " + rotation_degrees);
+						Log.d(TAG, "orientation of display relative to natural orientation: " + rotation_degrees);
 					}*/
                     if( MyDebug.LOG )
                         Log.d(TAG, "time before creating new_zebra_stripes_bitmap: " + (System.currentTimeMillis() - debug_time));
