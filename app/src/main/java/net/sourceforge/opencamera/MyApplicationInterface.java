@@ -1680,6 +1680,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean panorama = photo_mode_pref.equals("preference_photo_mode_panorama");
         if( panorama && !main_activity.getPreview().isVideo() && main_activity.supportsPanorama() )
             return PhotoMode.Panorama;
+        boolean x_hdr = photo_mode_pref.equals("preference_photo_mode_x_hdr");
+        if( x_hdr && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_HDR) )
+            return PhotoMode.X_HDR;
+        boolean x_bokeh = photo_mode_pref.equals("preference_photo_mode_x_bokeh");
+        if( x_bokeh && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BOKEH) )
+            return PhotoMode.X_Bokeh;
+        boolean x_beauty = photo_mode_pref.equals("preference_photo_mode_x_beauty");
+        if( x_beauty && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BEAUTY) )
+            return PhotoMode.X_Beauty;
         return PhotoMode.Standard;
     }
 
