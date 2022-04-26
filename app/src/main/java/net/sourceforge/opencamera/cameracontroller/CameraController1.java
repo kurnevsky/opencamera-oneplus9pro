@@ -761,6 +761,16 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public void setCameraExtension(boolean enabled, int extension) {
+        // not supported
+    }
+
+    @Override
+    public boolean isCameraExtension() {
+        return false;
+    }
+
+    @Override
     public void setBurstType(BurstType burst_type) {
         if( MyDebug.LOG )
             Log.d(TAG, "setBurstType: " + burst_type);

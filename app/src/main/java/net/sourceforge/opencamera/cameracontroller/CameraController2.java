@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +24,8 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraExtensionSession;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureFailure;
@@ -31,7 +34,9 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.Capability;
+import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
@@ -73,6 +78,7 @@ public class CameraController2 extends CameraController {
     private final boolean is_samsung_galaxy_s;
 
     private CameraCharacteristics characteristics;
+    private CameraExtensionCharacteristics extension_characteristics;
     // cached characteristics (use this for values that need to be frequently accessed, e.g., per frame, to improve performance);
     private int characteristics_sensor_orientation;
     private Facing characteristics_facing;
@@ -155,7 +161,17 @@ public class CameraController2 extends CameraController {
 
     private final ErrorCallback preview_error_cb;
     private final ErrorCallback camera_error_cb;
-    private CameraCaptureSession captureSession;
+
+    private enum SessionType {
+        SESSIONTYPE_NORMAL, // standard use of Camera2 API, via CameraCaptureSession
+        SESSIONTYPE_EXTENSION, // use of vendor extension, via CameraExtensionSession
+    }
+    private SessionType sessionType = SessionType.SESSIONTYPE_NORMAL;
+    //private SessionType sessionType = SessionType.SESSIONTYPE_EXTENSION; // test
+    private CameraCaptureSession captureSession; // used if sessionType == SESSIONTYPE_NORMAL
+    private CameraExtensionSession extensionSession; // used if sessionType == SESSIONTYPE_EXTENSION
+    private int camera_extension = 0; // used if sessionType == SESSIONTYPE_EXTENSION
+
     private CaptureRequest.Builder previewBuilder;
     private boolean previewIsVideoMode;
     private AutoFocusCallback autofocus_cb;
@@ -226,6 +242,7 @@ public class CameraController2 extends CameraController {
     private Surface surface_texture;
     private HandlerThread thread;
     private Handler handler;
+    private Executor executor;
     private Surface video_recorder_surface;
 
     private int preview_width;
@@ -286,6 +303,17 @@ public class CameraController2 extends CameraController {
      *  different to the preview.
      */
     private final static long max_preview_exposure_time_c = 1000000000L/5;
+
+    private void resetCaptureResultInfo() {
+        capture_result_is_ae_scanning = false;
+        capture_result_ae = null;
+        is_flash_required = false;
+        capture_result_has_white_balance_rggb = false;
+        capture_result_has_iso = false;
+        capture_result_has_exposure_time = false;
+        capture_result_has_frame_duration = false;
+        capture_result_has_aperture = false;
+    }
 
     private enum RequestTagType {
         CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
@@ -1157,7 +1185,15 @@ public class CameraController2 extends CameraController {
     }
 
     private boolean hasCaptureSession() {
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION )
+            return extensionSession != null;
         return captureSession != null;
+    }
+
+    private void BLOCK_FOR_EXTENSIONS() {
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+            throw new RuntimeException("not supported for extension session");
+        }
     }
 
     private static RggbChannelVector convertTemperatureToRggbVector(int temperature_kelvin) {
@@ -1444,6 +1480,7 @@ public class CameraController2 extends CameraController {
         private void takePhotoPartial() {
             if( MyDebug.LOG )
                 Log.d(TAG, "takePhotoPartial");
+            BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
 
             ErrorCallback push_take_picture_error_cb = null;
 
@@ -1836,6 +1873,13 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "this: " + this);
         }
 
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+            this.previewExtensionCaptureCallback = new MyExtensionCaptureCallback();
+        }
+        else {
+            this.previewExtensionCaptureCallback = null;
+        }
+
         this.context = context;
         this.preview_error_cb = preview_error_cb;
         this.camera_error_cb = camera_error_cb;
@@ -1854,6 +1898,12 @@ public class CameraController2 extends CameraController {
         thread = new HandlerThread("CameraBackground"); 
         thread.start(); 
         handler = new Handler(thread.getLooper());
+        executor = new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                handler.post(command);
+            }
+        };
 
         final CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 
@@ -1898,6 +1948,12 @@ public class CameraController2 extends CameraController {
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "characteristics_sensor_orientation: " + characteristics_sensor_orientation);
                             Log.d(TAG, "characteristics_facing: " + characteristics_facing);
+                        }
+
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                            extension_characteristics = manager.getCameraExtensionCharacteristics(cameraIdS);
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "successfully obtained camera characteristics");
                         }
 
                         CameraController2.this.camera = cam;
@@ -2134,10 +2190,22 @@ public class CameraController2 extends CameraController {
         synchronized( background_camera_lock ) {
             if( captureSession != null ) {
                 if( MyDebug.LOG )
-                    Log.d(TAG, "close old capture session");
+                    Log.d(TAG, "close capture session");
                 captureSession.close();
                 captureSession = null;
-                //pending_request_when_ready = null;
+            }
+            if( extensionSession != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "close extension session");
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                    try {
+                        extensionSession.close();
+                    }
+                    catch(CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+                extensionSession = null;
             }
         }
     }
@@ -2166,6 +2234,7 @@ public class CameraController2 extends CameraController {
                 thread.join();
                 thread = null;
                 handler = null;
+                executor = null;
             }
             catch(InterruptedException e) {
                 e.printStackTrace();
@@ -2719,6 +2788,61 @@ public class CameraController2 extends CameraController {
                     continue;
                 }
                 camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+            }
+        }
+
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+            List<Integer> extensions = extension_characteristics.getSupportedExtensions();
+            if( extensions != null ) {
+                camera_features.supported_extensions = new ArrayList<>();
+                for(int extension : extensions) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "extension: " + extension);
+
+                    // we assume that the allowed extension sizes are a subset of the full sizes - makes things easier to manage
+
+                    List<android.util.Size> extension_picture_sizes = extension_characteristics.getExtensionSupportedSizes(extension, ImageFormat.JPEG);
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "    extension_picture_sizes: " + extension_picture_sizes);
+                    boolean has_picture_resolution = false;
+                    for(CameraController.Size size : camera_features.picture_sizes) {
+                        if( extension_picture_sizes.contains(new android.util.Size(size.width, size.height)) ) {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "    picture size supports extension: " + size.width + " , " + size.height);
+                            }
+                            has_picture_resolution = true;
+                        }
+                        else {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "    picture size does NOT support extension: " + size.width + " , " + size.height);
+                            }
+                        }
+                    }
+
+                    List<android.util.Size> extension_preview_sizes = extension_characteristics.getExtensionSupportedSizes(extension, SurfaceTexture.class);
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "    extension_preview_sizes: " + extension_preview_sizes);
+                    boolean has_preview_resolution = false;
+                    for(CameraController.Size size : camera_features.preview_sizes) {
+                        if( extension_preview_sizes.contains(new android.util.Size(size.width, size.height)) ) {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "    preview size supports extension: " + size.width + " , " + size.height);
+                            }
+                            has_preview_resolution = true;
+                        }
+                        else {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "    preview size does NOT support extension: " + size.width + " , " + size.height);
+                            }
+                        }
+                    }
+
+                    if( has_picture_resolution && has_preview_resolution ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "    extension is supported: " + extension);
+                        camera_features.supported_extensions.add(extension);
+                    }
+                }
             }
         }
 
@@ -3912,6 +4036,38 @@ public class CameraController2 extends CameraController {
         }
         this.want_video_high_speed = want_video_high_speed;
         this.is_video_high_speed = false; // reset just to be safe
+    }
+
+    @Override
+    public void setCameraExtension(boolean enabled, int extension) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setCameraExtension: " + extension);
+
+        if( camera == null ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "no camera");
+            return;
+        }
+        if( hasCaptureSession() ) {
+            // can only call this when captureSession not created - as it affects how we create the imageReader
+            if( MyDebug.LOG )
+                Log.e(TAG, "can't set extension when captureSession running!");
+            throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+        }
+
+        if( enabled ) {
+            this.sessionType = SessionType.SESSIONTYPE_EXTENSION;
+            this.camera_extension = extension;
+        }
+        else {
+            this.sessionType = SessionType.SESSIONTYPE_NORMAL;
+            this.camera_extension = 0;
+        }
+    }
+
+    @Override
+    public boolean isCameraExtension() {
+        return camera != null && hasCaptureSession() && this.sessionType == SessionType.SESSIONTYPE_EXTENSION;
     }
 
     @Override
@@ -5126,7 +5282,12 @@ public class CameraController2 extends CameraController {
                 return;
             }
             try {
-                if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+                if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                    if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                        extensionSession.setRepeatingRequest(request, executor, previewExtensionCaptureCallback);
+                    }
+                }
+                else if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                     CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession) captureSession;
                     List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
                     captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
@@ -5150,6 +5311,9 @@ public class CameraController2 extends CameraController {
         capture(previewBuilder.build());
     }
 
+    /** Performs a "capture" - note that in practice this isn't used for taking photos, but for
+     *  one-off captures for the preview stream (e.g., to trigger focus).
+     */
     private void capture(CaptureRequest request) throws CameraAccessException {
         if( MyDebug.LOG )
             Log.d(TAG, "capture");
@@ -5159,6 +5323,7 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "no camera or capture session");
                 return;
             }
+            BLOCK_FOR_EXTENSIONS(); // not yet supported for extension sessions
             captureSession.capture(request, previewCaptureCallback, handler);
         }
     }
@@ -5291,12 +5456,8 @@ public class CameraController2 extends CameraController {
 
             class MyStateCallback extends CameraCaptureSession.StateCallback {
                 private boolean callback_done; // must synchronize on this and notifyAll when setting to true
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession session) {
-                    if( MyDebug.LOG ) {
-                        Log.d(TAG, "onConfigured: " + session);
-                        Log.d(TAG, "captureSession was: " + captureSession);
-                    }
+
+                void onConfigured(@NonNull CameraCaptureSession session, @NonNull CameraExtensionSession eSession) {
                     if( camera == null ) {
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "camera is closed");
@@ -5309,11 +5470,8 @@ public class CameraController2 extends CameraController {
                     }
                     synchronized( background_camera_lock ) {
                         captureSession = session;
-                        Surface surface = getPreviewSurface();
-                        if( MyDebug.LOG ) {
-                            Log.d(TAG, "add surface to previewBuilder: " + surface);
-                        }
-                        previewBuilder.addTarget(surface);
+                        extensionSession = eSession;
+                        previewBuilder.addTarget(surface_texture);
                         if( video_recorder != null ) {
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add video recorder surface to previewBuilder: " + video_recorder_surface);
@@ -5333,6 +5491,7 @@ public class CameraController2 extends CameraController {
                             // we indicate that we failed to start the preview by setting captureSession back to null
                             // this will cause a CameraControllerException to be thrown below
                             captureSession = null;
+                            extensionSession = null;
                         }
                     }
                     synchronized( background_camera_lock ) {
@@ -5342,16 +5501,27 @@ public class CameraController2 extends CameraController {
                 }
 
                 @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                public void onConfigured(@NonNull CameraCaptureSession session) {
                     if( MyDebug.LOG ) {
-                        Log.d(TAG, "onConfigureFailed: " + session);
-                        Log.d(TAG, "captureSession was: " + captureSession);
+                        Log.d(TAG, "onConfigured: " + session);
                     }
+                    onConfigured(session, null);
+                }
+
+                void onConfigureFailed() {
                     synchronized( background_camera_lock ) {
                         callback_done = true;
                         background_camera_lock.notifyAll();
                     }
                     // don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "onConfigureFailed: " + session);
+                    }
+                    onConfigureFailed();
                 }
 
                 /*@Override
@@ -5431,7 +5601,49 @@ public class CameraController2 extends CameraController {
                     }
                 }
             }
-            if( video_recorder != null && want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                    //int extension = CameraExtensionCharacteristics.EXTENSION_AUTOMATIC;
+                    //int extension = CameraExtensionCharacteristics.EXTENSION_BOKEH;
+                    int extension = camera_extension;
+                    List<OutputConfiguration> outputs = new ArrayList<>();
+                    for(Surface surface : surfaces) {
+                        outputs.add(new OutputConfiguration(surface));
+                    }
+                    ExtensionSessionConfiguration extensionConfiguration = new ExtensionSessionConfiguration(
+                            extension,
+                            outputs,
+                            executor,
+                            new CameraExtensionSession.StateCallback() {
+                                @Override
+                                public void onConfigured(@NonNull CameraExtensionSession session) {
+                                    if( MyDebug.LOG ) {
+                                        Log.d(TAG, "onConfigured: " + session);
+                                    }
+                                    myStateCallback.onConfigured(null, session);
+                                }
+
+                                @Override
+                                public void onConfigureFailed(@NonNull CameraExtensionSession session) {
+                                    if( MyDebug.LOG ) {
+                                        Log.d(TAG, "onConfigureFailed: " + session);
+                                    }
+                                    myStateCallback.onConfigureFailed();
+                                }
+
+                                @Override
+                                public void onClosed(@NonNull CameraExtensionSession session) {
+                                    if( MyDebug.LOG ) {
+                                        Log.d(TAG, "onClosed: " + session);
+                                    }
+                                }
+                            }
+                    );
+                    camera.createExtensionSession(extensionConfiguration);
+                }
+                is_video_high_speed = false;
+            }
+            else if( video_recorder != null && want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
             //if( want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 camera.createConstrainedHighSpeedCaptureSession(surfaces,
                     myStateCallback,
@@ -5475,7 +5687,13 @@ public class CameraController2 extends CameraController {
                 }
             }
             if( MyDebug.LOG ) {
-                Log.d(TAG, "created captureSession: " + captureSession);
+                if( captureSession != null )
+                    Log.d(TAG, "created captureSession: " + captureSession);
+                if( extensionSession != null )
+                    Log.d(TAG, "created extensionSession: " + extensionSession);
+            }
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                resetCaptureResultInfo(); // important as extension modes don't receive capture result info
             }
             synchronized( background_camera_lock ) {
                 if( !hasCaptureSession() ) {
@@ -5559,7 +5777,14 @@ public class CameraController2 extends CameraController {
                 //pending_request_when_ready = null;
 
                 try {
-                    captureSession.stopRepeating();
+                    if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                            extensionSession.stopRepeating();
+                        }
+                    }
+                    else {
+                        captureSession.stopRepeating();
+                    }
                 }
                 catch(IllegalStateException e) {
                     if( MyDebug.LOG )
@@ -5688,6 +5913,12 @@ public class CameraController2 extends CameraController {
                 // (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
                 if( MyDebug.LOG )
                     Log.d(TAG, "no focus mode");
+                cb.onAutoFocus(true);
+                return;
+            }
+            else if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "no auto focus for extensions");
                 cb.onAutoFocus(true);
                 return;
             }
@@ -5828,6 +6059,12 @@ public class CameraController2 extends CameraController {
             if( is_video_high_speed ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "video is high speed");
+                return;
+            }
+
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "session type extension");
                 return;
             }
 
@@ -6027,7 +6264,8 @@ public class CameraController2 extends CameraController {
                     // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
                     // but don't do this in video mode - if we're taking photo snapshots while video recording, we don't want to pause video!
                     // update: bug with flash may have been device specific (things are fine with Nokia 8)
-                    captureSession.stopRepeating();
+                    if( sessionType != SessionType.SESSIONTYPE_EXTENSION )
+                        captureSession.stopRepeating();
                 }
             }
             catch(CameraAccessException e) {
@@ -6091,9 +6329,17 @@ public class CameraController2 extends CameraController {
                     if( MyDebug.LOG )
                         Log.d(TAG, "capture with stillBuilder");
                     //pending_request_when_ready = stillBuilder.build();
-                    captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
-                    //captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
-                    //}, handler);
+
+                    if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+                            extensionSession.capture(stillBuilder.build(), executor, previewExtensionCaptureCallback);
+                        }
+                    }
+                    else {
+                        captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
+                        //captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
+                        //}, handler);
+                    }
                     playSound(MediaActionSound.SHUTTER_CLICK); // play shutter sound asap, otherwise user has the illusion of being slow to take photos
                 }
                 catch(CameraAccessException e) {
@@ -6198,6 +6444,7 @@ public class CameraController2 extends CameraController {
         if( burst_type != BurstType.BURSTTYPE_EXPO && burst_type != BurstType.BURSTTYPE_FOCUS ) {
             Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
         }
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
 
         List<CaptureRequest> requests = new ArrayList<>();
         boolean ok = true;
@@ -6553,6 +6800,7 @@ public class CameraController2 extends CameraController {
         if( burst_type != BurstType.BURSTTYPE_NORMAL && burst_type != BurstType.BURSTTYPE_CONTINUOUS ) {
             Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
         }
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
 
         boolean is_new_burst = true;
         CaptureRequest request = null;
@@ -6894,6 +7142,9 @@ public class CameraController2 extends CameraController {
     private void runPrecapture() {
         if( MyDebug.LOG )
             Log.d(TAG, "runPrecapture");
+
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
+
         long debug_time = 0;
         if( MyDebug.LOG ) {
             debug_time = System.currentTimeMillis();
@@ -6959,6 +7210,9 @@ public class CameraController2 extends CameraController {
     private void runFakePrecapture() {
         if( MyDebug.LOG )
             Log.d(TAG, "runFakePrecapture");
+
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
+
         long debug_time = 0;
         if( MyDebug.LOG ) {
             debug_time = System.currentTimeMillis();
@@ -7124,7 +7378,7 @@ public class CameraController2 extends CameraController {
             this.done_all_captures = false;
             this.take_picture_error_cb = error;
             this.fake_precapture_torch_performed = false; // just in case still on?
-            if( !ready_for_capture ) {
+            if( sessionType == SessionType.SESSIONTYPE_NORMAL && !ready_for_capture ) {
                 if( MyDebug.LOG )
                     Log.e(TAG, "takePicture: not ready for capture!");
                 //throw new RuntimeException(); // debugging
@@ -7135,8 +7389,12 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "current flash value: " + camera_settings.flash_value);
                     Log.d(TAG, "use_fake_precapture_mode: " + use_fake_precapture_mode);
                 }
-                // Don't need precapture if flash off or torch
-                if( camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") || camera_settings.flash_value.equals("flash_frontscreen_torch") ) {
+                if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                    // precapture not supported for extensions
+                    call_takePictureAfterPrecapture = true;
+                }
+                else if( camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") || camera_settings.flash_value.equals("flash_frontscreen_torch") ) {
+                    // Don't need precapture if flash off or torch
                     call_takePictureAfterPrecapture = true;
                 }
                 else if( use_fake_precapture_mode ) {
@@ -7390,7 +7648,85 @@ public class CameraController2 extends CameraController {
     }
     */
 
-    private final CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+    private final CameraExtensionSession.ExtensionCaptureCallback previewExtensionCaptureCallback;
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private class MyExtensionCaptureCallback extends CameraExtensionSession.ExtensionCaptureCallback {
+
+        @Override
+        public void onCaptureStarted(@NonNull CameraExtensionSession session,
+                                     @NonNull CaptureRequest request, long timestamp) {
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "onCaptureStarted");*/
+            if( MyDebug.LOG ) {
+                if( previewCaptureCallback.getRequestTagType(request) == RequestTagType.CAPTURE ) {
+                    Log.d(TAG, "onCaptureStarted: capture");
+                }
+                else if( previewCaptureCallback.getRequestTagType(request) == RequestTagType.CAPTURE_BURST_IN_PROGRESS ) {
+                    Log.d(TAG, "onCaptureStarted: capture burst in progress");
+                }
+            }
+
+            // for previewCaptureCallback, we set has_received_frame in onCaptureCompleted(), but
+            // that method doesn't exist for ExtensionCaptureCallback, and the other methods such as
+            // onCaptureSequenceCompleted aren't called for the preview captures
+            if( !has_received_frame ) {
+                has_received_frame = true;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "has_received_frame now set to true");
+            }
+
+            super.onCaptureStarted(session, request, timestamp);
+        }
+
+        @Override
+        public void onCaptureProcessStarted(@NonNull CameraExtensionSession session,
+                                            @NonNull CaptureRequest request) {
+            super.onCaptureProcessStarted(session, request);
+        }
+
+        @Override
+        public void onCaptureFailed(@NonNull CameraExtensionSession session,
+                                    @NonNull CaptureRequest request) {
+            if( MyDebug.LOG ) {
+                Log.e(TAG, "onCaptureFailed");
+            }
+            super.onCaptureFailed(session, request);
+        }
+
+        @Override
+        public void onCaptureSequenceCompleted(@NonNull CameraExtensionSession session,
+                                               int sequenceId) {
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "onCaptureSequenceCompleted");
+                Log.d(TAG, "sequenceId: " + sequenceId);
+            }
+
+            // since we don't receive the request, we can't check for a request tag type of
+            // RequestTagType.CAPTURE - but this method should only be called for photo captures
+            // anyway
+            test_capture_results++;
+            modified_from_camera_settings = false;
+
+            previewCaptureCallback.callCheckImagesCompleted();
+
+            super.onCaptureSequenceCompleted(session, sequenceId);
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(@NonNull CameraExtensionSession session,
+                                             int sequenceId) {
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "onCaptureSequenceAborted");
+                Log.d(TAG, "sequenceId: " + sequenceId);
+            }
+            super.onCaptureSequenceAborted(session, sequenceId);
+        }
+    }
+
+    private final MyCaptureCallback previewCaptureCallback = new MyCaptureCallback();
+
+    private class MyCaptureCallback extends CameraCaptureSession.CaptureCallback {
         private long last_process_frame_number = 0;
         private int last_af_state = -1;
 
@@ -8301,5 +8637,5 @@ public class CameraController2 extends CameraController {
                 handleCaptureBurstInProgress(result);
             }
         }
-    };
+    }
 }

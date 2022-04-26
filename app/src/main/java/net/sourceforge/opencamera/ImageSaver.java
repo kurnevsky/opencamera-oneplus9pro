@@ -132,6 +132,7 @@ public class ImageSaver extends Thread {
         final boolean image_capture_intent;
         final Uri image_capture_intent_uri;
         final boolean using_camera2;
+        final boolean using_camera_extensions;
         /* image_format allows converting the standard JPEG image into another file format.
 #		 */
         enum ImageFormat {
@@ -183,7 +184,7 @@ public class ImageSaver extends Thread {
                 List<byte []> jpeg_images,
                 RawImage raw_image,
                 boolean image_capture_intent, Uri image_capture_intent_uri,
-                boolean using_camera2,
+                boolean using_camera2, boolean using_camera_extensions,
                 ImageFormat image_format, int image_quality,
                 boolean do_auto_stabilise, double level_angle, List<float []> gyro_rotation_matrix,
                 boolean is_front_facing,
@@ -210,6 +211,7 @@ public class ImageSaver extends Thread {
             this.image_capture_intent = image_capture_intent;
             this.image_capture_intent_uri = image_capture_intent_uri;
             this.using_camera2 = using_camera2;
+            this.using_camera_extensions = using_camera_extensions;
             this.image_format = image_format;
             this.image_quality = image_quality;
             this.do_auto_stabilise = do_auto_stabilise;
@@ -256,7 +258,7 @@ public class ImageSaver extends Thread {
                     this.jpeg_images,
                     this.raw_image,
                     this.image_capture_intent, this.image_capture_intent_uri,
-                    this.using_camera2,
+                    this.using_camera2, this.using_camera_extensions,
                     this.image_format, this.image_quality,
                     this.do_auto_stabilise, this.level_angle, this.gyro_rotation_matrix,
                     this.is_front_facing,
@@ -565,7 +567,7 @@ public class ImageSaver extends Thread {
                           boolean save_expo,
                           List<byte []> images,
                           boolean image_capture_intent, Uri image_capture_intent_uri,
-                          boolean using_camera2,
+                          boolean using_camera2, boolean using_camera_extensions,
                           Request.ImageFormat image_format, int image_quality,
                           boolean do_auto_stabilise, double level_angle,
                           boolean is_front_facing,
@@ -596,7 +598,7 @@ public class ImageSaver extends Thread {
                 images,
                 null,
                 image_capture_intent, image_capture_intent_uri,
-                using_camera2,
+                using_camera2, using_camera_extensions,
                 image_format, image_quality,
                 do_auto_stabilise, level_angle,
                 is_front_facing,
@@ -638,7 +640,7 @@ public class ImageSaver extends Thread {
                 null,
                 raw_image,
                 false, null,
-                false,
+                false, false,
                 Request.ImageFormat.STD, 0,
                 false, 0.0,
                 false,
@@ -664,7 +666,7 @@ public class ImageSaver extends Thread {
                            Request.ProcessType processType,
                            Request.SaveBase save_base,
                            boolean image_capture_intent, Uri image_capture_intent_uri,
-                           boolean using_camera2,
+                           boolean using_camera2, boolean using_camera_extensions,
                            Request.ImageFormat image_format, int image_quality,
                            boolean do_auto_stabilise, double level_angle, boolean want_gyro_matrices,
                            boolean is_front_facing,
@@ -692,7 +694,7 @@ public class ImageSaver extends Thread {
                 new ArrayList<>(),
                 null,
                 image_capture_intent, image_capture_intent_uri,
-                using_camera2,
+                using_camera2, using_camera_extensions,
                 image_format, image_quality,
                 do_auto_stabilise, level_angle, want_gyro_matrices ? new ArrayList<>() : null,
                 is_front_facing,
@@ -771,7 +773,7 @@ public class ImageSaver extends Thread {
                               List<byte []> jpeg_images,
                               RawImage raw_image,
                               boolean image_capture_intent, Uri image_capture_intent_uri,
-                              boolean using_camera2,
+                              boolean using_camera2, boolean using_camera_extensions,
                               Request.ImageFormat image_format, int image_quality,
                               boolean do_auto_stabilise, double level_angle,
                               boolean is_front_facing,
@@ -804,7 +806,7 @@ public class ImageSaver extends Thread {
                 jpeg_images,
                 raw_image,
                 image_capture_intent, image_capture_intent_uri,
-                using_camera2,
+                using_camera2, using_camera_extensions,
                 image_format, image_quality,
                 do_auto_stabilise, level_angle, null,
                 is_front_facing,
@@ -915,7 +917,7 @@ public class ImageSaver extends Thread {
                 null,
                 null,
                 false, null,
-                false,
+                false, false,
                 Request.ImageFormat.STD, 0,
                 false, 0.0, null,
                 false,
@@ -3150,7 +3152,7 @@ public class ImageSaver extends Thread {
                 exif_new.setAttribute(ExifInterface.TAG_USER_COMMENT, exif_user_comment);
         }
 
-        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
         setDateTimeExif(exif_new);
         exif_new.saveAttributes();
     }
@@ -3518,7 +3520,7 @@ public class ImageSaver extends Thread {
                 try {
                     ExifInterface exif = exif_holder.getExif();
                     if( exif != null ) {
-                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
                         exif.saveAttributes();
                     }
                 }
@@ -3534,6 +3536,29 @@ public class ImageSaver extends Thread {
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "*** time to add additional exif info: " + (System.currentTimeMillis() - time_s));
+        }
+        else if( request.using_camera_extensions ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "fix for exif datetime tags when using vendor extensions");
+            try {
+                ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
+                try {
+                    ExifInterface exif = exif_holder.getExif();
+                    if( exif != null ) {
+                        addDateTimeExif(exif, request.current_date);
+                        exif.saveAttributes();
+                    }
+                }
+                finally {
+                    exif_holder.close();
+                }
+            }
+            catch(NoClassDefFoundError exception) {
+                // have had Google Play crashes from new ExifInterface() elsewhere for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn), so also catch here just in case
+                if( MyDebug.LOG )
+                    Log.e(TAG, "exif orientation NoClassDefFoundError");
+                exception.printStackTrace();
+            }
         }
         else if( needGPSTimestampHack(request.type == Request.Type.JPEG, request.using_camera2, request.store_location) ) {
             if( MyDebug.LOG )
@@ -3566,7 +3591,7 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the exif data, if necessary.
      */
-    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright, double level_angle, double pitch_angle, boolean store_ypr) {
+    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, boolean using_camera_extensions, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright, double level_angle, double pitch_angle, boolean store_ypr) {
         if( MyDebug.LOG )
             Log.d(TAG, "modifyExif");
         setGPSDirectionExif(exif, store_geo_direction, geo_direction);
@@ -3582,7 +3607,10 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "UserComment: " + exif.getAttribute(ExifInterface.TAG_USER_COMMENT));
         }
         setCustomExif(exif, custom_tag_artist, custom_tag_copyright);
-        if( needGPSTimestampHack(is_jpeg, using_camera2, store_location) ) {
+        if( using_camera_extensions ) {
+            addDateTimeExif(exif, current_date);
+        }
+        else if( needGPSTimestampHack(is_jpeg, using_camera2, store_location) ) {
             fixGPSTimestamp(exif, current_date);
         }
     }
@@ -3649,6 +3677,42 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "write datetime tags: " + exif_datetime);
             exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, exif_datetime);
             exif.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, exif_datetime);
+        }
+    }
+
+    /** Adds exif tags for datetime from the supplied date, if not present. Needed for camera vendor
+     *  extensions which (at least on Galaxy S10e) don't seem to have these tags set at all!
+     */
+    private void addDateTimeExif(ExifInterface exif, Date current_date) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "addDateTimeExif");
+        String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+        if( MyDebug.LOG )
+            Log.d(TAG, "existing exif TAG_DATETIME: " + exif_datetime);
+        if( exif_datetime == null ) {
+            SimpleDateFormat date_fmt = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US);
+            date_fmt.setTimeZone(TimeZone.getDefault()); // need local timezone for TAG_DATETIME
+            exif_datetime = date_fmt.format(current_date);
+            if( MyDebug.LOG )
+                Log.d(TAG, "new TAG_DATETIME: " + exif_datetime);
+
+            exif.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
+            // set these tags too (even if already present, overwrite to be consistent)
+            exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, exif_datetime);
+            exif.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, exif_datetime);
+
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+                // XXX requires Android 7
+                // needs to be -/+HH:mm format, which is given by XXX
+                date_fmt = new SimpleDateFormat("XXX", Locale.US);
+                date_fmt.setTimeZone(TimeZone.getDefault());
+                String timezone = date_fmt.format(current_date);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "timezone: " + timezone);
+                exif.setAttribute(ExifInterface.TAG_OFFSET_TIME, timezone);
+                exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, timezone);
+                exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED, timezone);
+            }
         }
     }
 

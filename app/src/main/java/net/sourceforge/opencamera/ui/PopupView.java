@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -217,6 +218,18 @@ public class PopupView extends LinearLayout {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_focus_bracketing_full : R.string.photo_mode_focus_bracketing) );
                 photo_mode_values.add( MyApplicationInterface.PhotoMode.FocusBracketing );
             }
+            if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_HDR) ) {
+                photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_hdr_full : R.string.photo_mode_x_hdr) );
+                photo_mode_values.add( MyApplicationInterface.PhotoMode.X_HDR );
+            }
+            if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BOKEH) ) {
+                photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_bokeh_full : R.string.photo_mode_x_bokeh) );
+                photo_mode_values.add( MyApplicationInterface.PhotoMode.X_Bokeh );
+            }
+            if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BEAUTY) ) {
+                photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_beauty_full : R.string.photo_mode_x_beauty) );
+                photo_mode_values.add( MyApplicationInterface.PhotoMode.X_Beauty );
+            }
             if( preview.isVideo() ) {
                 // only show photo modes when in photo mode, not video mode!
                 // (photo modes not supported for photo snapshot whilst recording video)
@@ -401,8 +414,11 @@ public class PopupView extends LinearLayout {
                         editor.apply();
 
                         // make it easier to scroll through the list of resolutions without a pause each time
+                        // need a longer time for extension modes, due to the need to camera reopening (which will cause the
+                        // popup menu to close)
+                        final long delay_time = main_activity.getApplicationInterface().isCameraExtensionPref() ? 800 : 400;
                         handler.removeCallbacks(update_runnable);
-                        handler.postDelayed(update_runnable, 400);
+                        handler.postDelayed(update_runnable, delay_time);
                     }
 
                     @Override
@@ -1106,6 +1122,15 @@ public class PopupView extends LinearLayout {
                 case Panorama:
                     toast_message = getResources().getString(R.string.photo_mode_panorama_full);
                     break;
+                case X_HDR:
+                    toast_message = getResources().getString(R.string.photo_mode_x_hdr_full);
+                    break;
+                case X_Bokeh:
+                    toast_message = getResources().getString(R.string.photo_mode_x_bokeh_full);
+                    break;
+                case X_Beauty:
+                    toast_message = getResources().getString(R.string.photo_mode_x_beauty_full);
+                    break;
             }
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -1133,6 +1158,15 @@ public class PopupView extends LinearLayout {
                     break;
                 case Panorama:
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
+                    break;
+                case X_HDR:
+                    editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_hdr");
+                    break;
+                case X_Bokeh:
+                    editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_bokeh");
+                    break;
+                case X_Beauty:
+                    editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_beauty");
                     break;
                 default:
                     if (MyDebug.LOG)

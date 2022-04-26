@@ -9,9 +9,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
+
+import androidx.annotation.RequiresApi;
 
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
@@ -158,6 +161,9 @@ public interface ApplicationInterface {
         NRMODE_LOW_LIGHT
     }
     NRModePref getNRModePref(); // only relevant if getBurstForNoiseReduction() returns true; if this changes without reopening the preview's camera, call Preview.setupBurstMode()
+    boolean isCameraExtensionPref(); // whether to use camera vendor extension (see https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics )
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    int getCameraExtensionPref(); // if isCameraExtensionPref() returns true, the camera extension mode to use
     float getAperturePref(); // get desired aperture (called if Preview.getSupportedApertures() returns non-null); return -1.0f for no preference
     boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
     enum RawPref {

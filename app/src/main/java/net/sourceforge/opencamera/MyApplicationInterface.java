@@ -34,6 +34,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Address;
 import android.location.Geocoder;
+import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.location.Location;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -55,6 +56,8 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.annotation.RequiresApi;
+
 /** Our implementation of ApplicationInterface, see there for details.
  */
 public class MyApplicationInterface extends BasicApplicationInterface {
@@ -69,7 +72,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         FocusBracketing, // take multiple focus bracketed images, without combining to a single image
         FastBurst,
         NoiseReduction,
-        Panorama
+        Panorama,
+        // camera vendor extensions:
+        X_HDR,
+        X_Bokeh,
+        X_Beauty
     }
 
     private final MainActivity main_activity;
@@ -1536,6 +1543,28 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return NRModePref.NRMODE_NORMAL;
     }
 
+    @Override
+    public boolean isCameraExtensionPref() {
+        PhotoMode photo_mode = getPhotoMode();
+        return photo_mode == PhotoMode.X_HDR || photo_mode == PhotoMode.X_Bokeh || photo_mode == PhotoMode.X_Beauty;
+    }
+
+    @Override
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public int getCameraExtensionPref() {
+        PhotoMode photo_mode = getPhotoMode();
+        if( photo_mode == PhotoMode.X_HDR ) {
+            return CameraExtensionCharacteristics.EXTENSION_HDR;
+        }
+        else if( photo_mode == PhotoMode.X_Bokeh ) {
+            return CameraExtensionCharacteristics.EXTENSION_BOKEH;
+        }
+        else if( photo_mode == PhotoMode.X_Beauty ) {
+            return CameraExtensionCharacteristics.EXTENSION_BEAUTY;
+        }
+        return 0;
+    }
+
     public void setAperture(float aperture) {
         this.aperture = aperture;
     }
@@ -1699,6 +1728,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     main_activity.supportsBurstRaw();
         }
         // not supported for panorama mode
+        // not supported for camera vendor extensions
         return false;
     }
 
@@ -3184,6 +3214,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
 
         boolean using_camera2 = main_activity.getPreview().usingCamera2API();
+        boolean using_camera_extensions = isCameraExtensionPref();
         ImageSaver.Request.ImageFormat image_format = getImageFormatPref();
         boolean store_ypr = sharedPreferences.getBoolean(PreferenceKeys.AddYPRToComments, false) &&
                 main_activity.getPreview().hasLevelAngle() &&
@@ -3318,7 +3349,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         photo_mode == PhotoMode.NoiseReduction ? ImageSaver.Request.ProcessType.AVERAGE : ImageSaver.Request.ProcessType.PANORAMA,
                         save_base,
                         image_capture_intent, image_capture_intent_uri,
-                        using_camera2,
+                        using_camera2, using_camera_extensions,
                         image_format, image_quality,
                         do_auto_stabilise, level_angle, photo_mode == PhotoMode.Panorama,
                         is_front_facing,
@@ -3360,7 +3391,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     force_suffix ? (n_capture_images-1) : 0,
                     save_expo, images,
                     image_capture_intent, image_capture_intent_uri,
-                    using_camera2,
+                    using_camera2, using_camera_extensions,
                     image_format, image_quality,
                     do_auto_stabilise, level_angle,
                     is_front_facing,

@@ -2801,8 +2801,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
+            if( !need_reopen ) {
+                boolean old_is_extension = preview.getCameraController().isCameraExtension();
+                //boolean new_is_extension = applicationInterface.isCameraExtensionPref();
+                if( old_is_extension /*&& new_is_extension*/ ) {
+                    // At least on Galaxy S10e, we have problems stopping and starting a camera extension session,
+                    // e.g., when changing resolutions whilst in an extension mode (XHDR or bokeh) or switching
+                    // from XHDR to other modes (including non-extension modes like STD). Problems such as preview
+                    // no longer receiving frames, or the call to createExtensionSession() (or createCaptureSession)
+                    // hanging.
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "need to reopen camera for changes to extension session");
+                    need_reopen = true;
+                }
+            }
         }
         if( MyDebug.LOG ) {
+            Log.d(TAG, "need_reopen: " + need_reopen);
             Log.d(TAG, "updateForSettings: time after check need_reopen: " + (System.currentTimeMillis() - debug_time));
         }
 
@@ -5232,6 +5248,13 @@ public class MainActivity extends AppCompatActivity {
         //return false; // currently blocked for release
     }
 
+    /** Whether the Camera vendor extension is supported (see
+     * https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics ).
+     */
+    public boolean supportsCameraExtension(int extension) {
+        return preview.supportsCameraExtension(extension);
+    }
+
     /** Whether RAW mode would be supported for various burst modes (expo bracketing etc).
      *  Note that caller should still separately check preview.supportsRaw() if required.
      */
@@ -5357,6 +5380,15 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case Panorama:
                 photo_mode_string = getResources().getString(R.string.photo_mode_panorama_full);
+                break;
+            case X_HDR:
+                photo_mode_string = getResources().getString(R.string.photo_mode_x_hdr_full);
+                break;
+            case X_Bokeh:
+                photo_mode_string = getResources().getString(R.string.photo_mode_x_bokeh_full);
+                break;
+            case X_Beauty:
+                photo_mode_string = getResources().getString(R.string.photo_mode_x_beauty_full);
                 break;
         }
         return photo_mode_string;

@@ -308,6 +308,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private ApplicationInterface.CameraResolutionConstraints photo_size_constraints;
     private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
+    public List<Integer> supported_extensions; // if non-null, list of supported camera vendor extensions, see https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics
+
     private boolean supports_video;
     private boolean has_capture_rate_factor; // whether we have a capture rate for faster (timelapse) or slow motion
     private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false; set lower than 1 for slow motion, higher than 1 for timelapse
@@ -1945,6 +1947,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             camera_controller.setRaw(false, 0);
         }
 
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && this.supported_extensions != null && applicationInterface.isCameraExtensionPref() ) {
+            int extension = applicationInterface.getCameraExtensionPref();
+            if( this.supported_extensions.contains(extension) ) {
+                camera_controller.setCameraExtension(true, extension);
+            }
+            else {
+                camera_controller.setCameraExtension(false, 0);
+            }
+        }
+        else {
+            camera_controller.setCameraExtension(false, 0);
+        }
+
         setupBurstMode();
 
         if( camera_controller.isBurstOrExpo() ) {
@@ -2197,6 +2212,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
             this.video_quality_handler.setVideoSizesHighSpeed(camera_features.video_sizes_high_speed);
             this.supported_preview_sizes = camera_features.preview_sizes;
+            this.supported_extensions = camera_features.supported_extensions;
         }
     }
 
@@ -7013,6 +7029,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     public boolean supportsBurst() {
         return this.supports_burst;
+    }
+
+    /** Whether the Camera vendor extension is supported (see
+     * https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics ).
+     */
+    public boolean supportsCameraExtension(int extension) {
+        return this.supported_extensions != null && this.supported_extensions.contains(extension);
     }
 
     public boolean supportsRaw() {

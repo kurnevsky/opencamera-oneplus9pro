@@ -66,6 +66,7 @@ public abstract class CameraController {
         public List<CameraController.Size> video_sizes;
         public List<CameraController.Size> video_sizes_high_speed; // may be null if high speed not supported
         public List<CameraController.Size> preview_sizes;
+        public List<Integer> supported_extensions; // if non-null, list of supported camera vendor extensions, see https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics
         public List<String> supported_flash_values;
         public List<String> supported_focus_values;
         public float [] apertures; // may be null if not supported, else will have at least 2 values
@@ -374,6 +375,8 @@ public abstract class CameraController {
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
 
+    public abstract void setCameraExtension(boolean enabled, int extension);
+    public abstract boolean isCameraExtension();
     // whether to take a burst of images, and if so, what type
     public enum BurstType {
         BURSTTYPE_NONE, // no burst

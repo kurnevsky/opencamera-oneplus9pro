@@ -7,8 +7,11 @@ import android.app.Activity;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Pair;
 import android.view.MotionEvent;
+
+import androidx.annotation.RequiresApi;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
@@ -348,6 +351,17 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     @Override
     public NRModePref getNRModePref() {
         return NRModePref.NRMODE_NORMAL;
+    }
+
+    @Override
+    public boolean isCameraExtensionPref() {
+        return false;
+    }
+
+    @Override
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public int getCameraExtensionPref() {
+        return 0;
     }
 
     @Override
