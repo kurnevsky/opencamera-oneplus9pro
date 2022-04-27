@@ -2811,6 +2811,10 @@ public class CameraController2 extends CameraController {
                                 Log.d(TAG, "    picture size supports extension: " + size.width + " , " + size.height);
                             }
                             has_picture_resolution = true;
+                            if( size.supported_extensions == null ) {
+                                size.supported_extensions = new ArrayList<>();
+                            }
+                            size.supported_extensions.add(extension);
                         }
                         else {
                             if( MyDebug.LOG ) {
@@ -2829,6 +2833,10 @@ public class CameraController2 extends CameraController {
                                 Log.d(TAG, "    preview size supports extension: " + size.width + " , " + size.height);
                             }
                             has_preview_resolution = true;
+                            if( size.supported_extensions == null ) {
+                                size.supported_extensions = new ArrayList<>();
+                            }
+                            size.supported_extensions.add(extension);
                         }
                         else {
                             if( MyDebug.LOG ) {
@@ -4068,6 +4076,13 @@ public class CameraController2 extends CameraController {
     @Override
     public boolean isCameraExtension() {
         return camera != null && hasCaptureSession() && this.sessionType == SessionType.SESSIONTYPE_EXTENSION;
+    }
+
+    @Override
+    public int getCameraExtension() {
+        if( isCameraExtension() )
+            return camera_extension;
+        return -1;
     }
 
     @Override

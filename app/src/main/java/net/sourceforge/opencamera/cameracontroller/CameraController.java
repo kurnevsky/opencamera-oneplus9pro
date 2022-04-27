@@ -163,6 +163,7 @@ public abstract class CameraController {
         public final int width;
         public final int height;
         public boolean supports_burst; // for photo
+        public List<Integer> supported_extensions; // for photo and preview: if non-null, list of supported camera vendor extensions
         final List<int[]> fps_ranges; // for video
         public final boolean high_speed; // for video
 
@@ -177,6 +178,16 @@ public abstract class CameraController {
 
         public Size(int width, int height) {
             this(width, height, new ArrayList<>(), false);
+        }
+
+        /** Whether this size supports the requested burst and/or extension
+         */
+        public boolean supportsRequirements(boolean want_burst, boolean want_extension, int extension) {
+            return (!want_burst || this.supports_burst) && (!want_extension || this.supportsExtension(extension));
+        }
+
+        public boolean supportsExtension(int extension) {
+            return supported_extensions != null && supported_extensions.contains(extension);
         }
 
         boolean supportsFrameRate(double fps) {
@@ -377,6 +388,7 @@ public abstract class CameraController {
 
     public abstract void setCameraExtension(boolean enabled, int extension);
     public abstract boolean isCameraExtension();
+    public abstract int getCameraExtension();
     // whether to take a burst of images, and if so, what type
     public enum BurstType {
         BURSTTYPE_NONE, // no burst

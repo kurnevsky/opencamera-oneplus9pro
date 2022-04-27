@@ -771,6 +771,11 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public int getCameraExtension() {
+        return -1;
+    }
+
+    @Override
     public void setBurstType(BurstType burst_type) {
         if( MyDebug.LOG )
             Log.d(TAG, "setBurstType: " + burst_type);
