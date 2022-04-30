@@ -4048,8 +4048,10 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setCameraExtension(boolean enabled, int extension) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "setCameraExtension: " + extension);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "setCameraExtension?: " + enabled);
+            Log.d(TAG, "extension: " + extension);
+        }
 
         if( camera == null ) {
             if( MyDebug.LOG )
