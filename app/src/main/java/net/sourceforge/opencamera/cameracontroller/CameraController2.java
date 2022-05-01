@@ -4122,7 +4122,7 @@ public class CameraController2 extends CameraController {
         if( n_images <= 1 || (n_images % 2) == 0 ) {
             if( MyDebug.LOG )
                 Log.e(TAG, "n_images should be an odd number greater than 1");
-            throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+            throw new RuntimeException("n_images should be an odd number greater than 1"); // throw as RuntimeException, as this is a programming error
         }
         if( n_images > max_expo_bracketing_n_images ) {
             n_images = max_expo_bracketing_n_images;
