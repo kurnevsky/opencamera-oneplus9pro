@@ -2953,6 +2953,8 @@ public class MainActivity extends AppCompatActivity {
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkDisableGUIIcons: " + changed);
         return changed;
     }
 
