@@ -594,7 +594,10 @@ public class CameraController2 extends CameraController {
 
         private boolean setAntiBanding(CaptureRequest.Builder builder) {
             boolean changed = false;
-            if( has_antibanding ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_antibanding ) {
                 if( builder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE) == null || builder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE) != antibanding ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "setting antibanding: " + antibanding);
@@ -612,7 +615,10 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "default_edge_mode: " + default_edge_mode);
             }
             boolean changed = false;
-            if( has_edge_mode ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_edge_mode ) {
                 if( !has_default_edge_mode ) {
                     // save the default_edge_mode edge_mode
                     has_default_edge_mode = true;
@@ -655,7 +661,10 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "default_noise_reduction_mode: " + default_noise_reduction_mode);
             }
             boolean changed = false;
-            if( has_noise_reduction_mode ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_noise_reduction_mode ) {
                 if( !has_default_noise_reduction_mode ) {
                     // save the default_noise_reduction_mode noise_reduction_mode
                     has_default_noise_reduction_mode = true;
@@ -875,6 +884,12 @@ public class CameraController2 extends CameraController {
         private void setStabilization(CaptureRequest.Builder builder) {
             if( MyDebug.LOG )
                 Log.d(TAG, "setStabilization: " + video_stabilization);
+
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+                return;
+            }
+
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             if( supports_optical_stabilization ) {
                 if( video_stabilization ) {
@@ -944,7 +959,10 @@ public class CameraController2 extends CameraController {
             //if( test_new )
             //    have_tonemap_profile = false;
 
-            if( have_tonemap_profile ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( have_tonemap_profile ) {
                 if( default_tonemap_mode == null ) {
                     // save the default tonemap_mode
                     default_tonemap_mode = builder.get(CaptureRequest.TONEMAP_MODE);
@@ -4065,6 +4083,20 @@ public class CameraController2 extends CameraController {
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
 
+        if( enabled != (sessionType == SessionType.SESSIONTYPE_EXTENSION) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "turning extension session on or off");
+            // ideally we'd probably only create the previewBuilder when starting the preview (so we
+            // start off with a "fresh" one), but for now at least ensure we start off with a fresh
+            // previewBuilder when enabling extensions (and might as well do so when disabling
+            // extensions too)
+            // this is useful for modes like CONTROL_AE_ANTIBANDING_MODE where there isn't an obvious#
+            // "default" to set (in theory extensions mode should just ignore such keys, but it'd be
+            // nicer to never set them)
+            previewBuilder = null;
+            createPreviewRequest();
+        }
+
         if( enabled ) {
             this.sessionType = SessionType.SESSIONTYPE_EXTENSION;
             this.camera_extension = extension;
@@ -5414,6 +5446,22 @@ public class CameraController2 extends CameraController {
 
         closeCaptureSession();
 
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+            // check parameters are compatible with extension sessions
+            // we check here rather than when setting those parameters, to avoid problems with
+            // ordering (e.g., the caller sets those parameters, and then switches to an
+            // extension session)
+            if( want_video_high_speed ) {
+                throw new RuntimeException("want_video_high_speed not supported for extension session");
+            }
+            else if( burst_type != BurstType.BURSTTYPE_NONE ) {
+                throw new RuntimeException("burst_type not supported for extension session");
+            }
+            else if( want_raw ) {
+                throw new RuntimeException("want_raw not supported for extension session");
+            }
+        }
+
         try {
             if( video_recorder != null ) {
                 if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
@@ -6257,9 +6305,10 @@ public class CameraController2 extends CameraController {
                 }
                 //stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                 //stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && sessionType != SessionType.SESSIONTYPE_EXTENSION ) {
                     // unclear why we wouldn't want to request ZSL
                     // this is also required to enable HDR+ on Google Pixel devices when using Camera2: https://opensource.google.com/projects/pixelvisualcorecamera
+                    // but don't set for extension sessions (in theory it should be ignored, but just in case)
                     stillBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
                     if( MyDebug.LOG ) {
                         Boolean zsl = stillBuilder.get(CaptureRequest.CONTROL_ENABLE_ZSL);
@@ -7526,6 +7575,7 @@ public class CameraController2 extends CameraController {
     @Override
     public void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
         // if we change where we play the START_VIDEO_RECORDING sound, make sure it can't be heard in resultant video
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
         playSound(MediaActionSound.START_VIDEO_RECORDING);
     }
 
@@ -7537,6 +7587,7 @@ public class CameraController2 extends CameraController {
             Log.e(TAG, "no camera");
             throw new CameraControllerException();
         }
+        BLOCK_FOR_EXTENSIONS(); // not supported for extension sessions
         try {
             if( MyDebug.LOG )
                 Log.d(TAG, "obtain video_recorder surface");

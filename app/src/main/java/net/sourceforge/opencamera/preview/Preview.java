@@ -1891,6 +1891,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.switchVideo(true, false);
         }
 
+        // seems sensible to set extension mode (or not) first
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && this.supported_extensions != null && applicationInterface.isCameraExtensionPref() ) {
+            int extension = applicationInterface.getCameraExtensionPref();
+            if( this.supported_extensions.contains(extension) ) {
+                camera_controller.setCameraExtension(true, extension);
+            }
+            else {
+                camera_controller.setCameraExtension(false, 0);
+            }
+        }
+        else {
+            camera_controller.setCameraExtension(false, 0);
+        }
+
         setupCameraParameters();
 
         updateFlashForVideo();
@@ -1945,19 +1959,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         else {
             camera_controller.setRaw(false, 0);
-        }
-
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && this.supported_extensions != null && applicationInterface.isCameraExtensionPref() ) {
-            int extension = applicationInterface.getCameraExtensionPref();
-            if( this.supported_extensions.contains(extension) ) {
-                camera_controller.setCameraExtension(true, extension);
-            }
-            else {
-                camera_controller.setCameraExtension(false, 0);
-            }
-        }
-        else {
-            camera_controller.setCameraExtension(false, 0);
         }
 
         setupBurstMode();
