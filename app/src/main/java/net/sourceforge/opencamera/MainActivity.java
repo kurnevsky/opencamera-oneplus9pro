@@ -2901,6 +2901,11 @@ public class MainActivity extends AppCompatActivity {
         if( MyDebug.LOG )
             Log.d(TAG, "checkDisableGUIIcons");
         boolean changed = false;
+        if( !supportsExposureButton() ) {
+            View button = findViewById(R.id.exposure);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
         if( !mainUI.showExposureLockIcon() ) {
             View button = findViewById(R.id.exposure_lock);
             changed = changed || (button.getVisibility() != View.GONE);
@@ -4757,11 +4762,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean supportsExposureButton() {
-        if( preview.getCameraController() == null )
-            return false;
         if( preview.isVideoHighSpeed() ) {
             // manual ISO/exposure not supported for high speed video mode
             // it's safer not to allow opening the panel at all (otherwise the user could open it, and switch to manual)
+            return false;
+        }
+        if( applicationInterface.isCameraExtensionPref() ) {
+            // nothing in this UI (exposure compensation, manual ISO/exposure, manual white balance) is supported for camera extensions
             return false;
         }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -5052,10 +5059,13 @@ public class MainActivity extends AppCompatActivity {
 
         // On-screen icons such as exposure lock, white balance lock, face detection etc are made visible if necessary in
         // MainUI.showGUI()
-        // However still nee to update visibility of icons where visibility depends on camera setup - e.g., exposure button
+        // However still need to enable visibility of icons where visibility depends on camera setup - e.g., exposure button
         // not supported for high speed video frame rates - see testTakeVideoFPSHighSpeedManual().
+        // (Disabling is done in checkDisableGUIIcons(), called below.)
         View exposureButton = findViewById(R.id.exposure);
-        exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+        //exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+        if( supportsExposureButton() && !mainUI.inImmersiveMode() )
+            exposureButton.setVisibility(View.VISIBLE);
 
         // needed as availability of some icons is per-camera (e.g., flash, RAW)
         // for making icons visible, this is done elsewhere in call to MainUI.showGUI()

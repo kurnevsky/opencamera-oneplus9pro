@@ -118,8 +118,10 @@ public class PopupView extends LinearLayout {
 		}*/
 
         final Preview preview = main_activity.getPreview();
+        boolean is_camera_extension = main_activity.getApplicationInterface().isCameraExtensionPref();
         if( MyDebug.LOG )
             Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
+
         if( !main_activity.getMainUI().showCycleFlashIcon() )
         {
             List<String> supported_flash_values = preview.getSupportedFlashValues();
@@ -525,7 +527,8 @@ public class PopupView extends LinearLayout {
             if( MyDebug.LOG )
                 Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
 
-            if( preview.getSupportedApertures() != null ) {
+            // apertures probably not supported for camera extensions anyway
+            if( preview.getSupportedApertures() != null && !is_camera_extension ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "add apertures");
 
@@ -1003,8 +1006,10 @@ public class PopupView extends LinearLayout {
             if( MyDebug.LOG )
                 Log.d(TAG, "PopupView time 13: " + (System.nanoTime() - debug_time));
 
+            // white balance modes, scene modes, color effects
+            // all of these are only supported when not using extension mode
             // popup should only be opened if we have a camera controller, but check just to be safe
-            if( preview.getCameraController() != null ) {
+            if( preview.getCameraController() != null && !is_camera_extension ) {
                 List<String> supported_white_balances = preview.getSupportedWhiteBalances();
                 List<String> supported_white_balances_entries = null;
                 if( supported_white_balances != null ) {

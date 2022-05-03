@@ -530,6 +530,12 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "setSceneMode");
                 Log.d(TAG, "builder: " + builder);
             }
+
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+                return false;
+            }
+
             Integer current_scene_mode = builder.get(CaptureRequest.CONTROL_SCENE_MODE);
             if( has_face_detect_mode ) {
                 // face detection mode overrides scene mode
@@ -557,10 +563,13 @@ public class CameraController2 extends CameraController {
         }
 
         private boolean setColorEffect(CaptureRequest.Builder builder) {
-            /*if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && color_effect == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
-                // can leave off
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
             }
-            else*/ if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || builder.get(CaptureRequest.CONTROL_EFFECT_MODE) != color_effect ) {
+            /*else if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && color_effect == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
+                // can leave off
+            }*/
+            else if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || builder.get(CaptureRequest.CONTROL_EFFECT_MODE) != color_effect ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "setting color effect: " + color_effect);
                 builder.set(CaptureRequest.CONTROL_EFFECT_MODE, color_effect);
@@ -571,10 +580,13 @@ public class CameraController2 extends CameraController {
 
         private boolean setWhiteBalance(CaptureRequest.Builder builder) {
             boolean changed = false;
-            /*if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
-                // can leave off
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
             }
-            else*/ if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null || builder.get(CaptureRequest.CONTROL_AWB_MODE) != white_balance ) {
+            /*else if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
+                // can leave off
+            }*/
+            else if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null || builder.get(CaptureRequest.CONTROL_AWB_MODE) != white_balance ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "setting white balance: " + white_balance);
                 builder.set(CaptureRequest.CONTROL_AWB_MODE, white_balance);
@@ -703,13 +715,16 @@ public class CameraController2 extends CameraController {
         private boolean setAperture(CaptureRequest.Builder builder) {
             if( MyDebug.LOG )
                 Log.d(TAG, "setAperture");
-            // don't set at all if has_aperture==false
-            if( has_aperture ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_aperture ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "    aperture: " + aperture);
                 builder.set(CaptureRequest.LENS_APERTURE, aperture);
                 return true;
             }
+            // don't set at all if has_aperture==false
             return false;
         }
 
@@ -805,7 +820,10 @@ public class CameraController2 extends CameraController {
         }
 
         private void setCropRegion(CaptureRequest.Builder builder) {
-            if( scalar_crop_region != null ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( scalar_crop_region != null ) {
                 builder.set(CaptureRequest.SCALER_CROP_REGION, scalar_crop_region);
             }
         }

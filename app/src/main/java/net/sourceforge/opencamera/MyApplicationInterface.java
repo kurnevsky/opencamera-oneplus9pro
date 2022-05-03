@@ -1815,8 +1815,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean allowZoom() {
-        if( getPhotoMode() == PhotoMode.Panorama ) {
+        if( getPhotoMode() == PhotoMode.Panorama || isCameraExtensionPref() ) {
             // don't allow zooming in panorama mode, the algorithm isn't set up to support this!
+            // zoom also not supported for camera extensions
             return false;
         }
         return true;
