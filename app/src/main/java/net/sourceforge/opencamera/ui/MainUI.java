@@ -1181,6 +1181,10 @@ public class MainUI {
     public boolean showExposureLockIcon() {
         if( !main_activity.getPreview().supportsExposureLock() )
             return false;
+        if( main_activity.getApplicationInterface().isCameraExtensionPref() ) {
+            // not supported for camera extensions
+            return false;
+        }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowExposureLockPreferenceKey, true);
     }
@@ -1188,6 +1192,10 @@ public class MainUI {
     public boolean showWhiteBalanceLockIcon() {
         if( !main_activity.getPreview().supportsWhiteBalanceLock() )
             return false;
+        if( main_activity.getApplicationInterface().isCameraExtensionPref() ) {
+            // not supported for camera extensions
+            return false;
+        }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, false);
     }

@@ -871,11 +871,21 @@ public class CameraController2 extends CameraController {
         }
 
         private void setAutoExposureLock(CaptureRequest.Builder builder) {
-            builder.set(CaptureRequest.CONTROL_AE_LOCK, ae_lock);
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else {
+                builder.set(CaptureRequest.CONTROL_AE_LOCK, ae_lock);
+            }
         }
 
         private void setAutoWhiteBalanceLock(CaptureRequest.Builder builder) {
-            builder.set(CaptureRequest.CONTROL_AWB_LOCK, wb_lock);
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else {
+                builder.set(CaptureRequest.CONTROL_AWB_LOCK, wb_lock);
+            }
         }
 
         private void setAFRegions(CaptureRequest.Builder builder) {
@@ -4972,6 +4982,9 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setAutoExposureLock(boolean enabled) {
+        if( enabled ) {
+            BLOCK_FOR_EXTENSIONS();
+        }
         camera_settings.ae_lock = enabled;
         camera_settings.setAutoExposureLock(previewBuilder);
         try {
@@ -4996,6 +5009,9 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setAutoWhiteBalanceLock(boolean enabled) {
+        if( enabled ) {
+            BLOCK_FOR_EXTENSIONS();
+        }
         camera_settings.wb_lock = enabled;
         camera_settings.setAutoWhiteBalanceLock(previewBuilder);
         try {
@@ -5492,6 +5508,12 @@ public class CameraController2 extends CameraController {
             }
             else if( camera_settings.sensor_frame_duration > 0 ) {
                 throw new RuntimeException("sensor_frame_duration not supported for extension session");
+            }
+            else if( camera_settings.ae_lock ) {
+                throw new RuntimeException("ae_lock not supported for extension session");
+            }
+            else if( camera_settings.wb_lock ) {
+                throw new RuntimeException("wb_lock not supported for extension session");
             }
         }
 

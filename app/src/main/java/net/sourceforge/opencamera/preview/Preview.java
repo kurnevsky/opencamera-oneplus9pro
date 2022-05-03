@@ -1912,6 +1912,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     }
                     supported_flash_values = new_supported_flash_values;
                 }
+
+                // and disable ae and awb lock (as normally we don't set this when stopping/starting preview)
+                camera_controller.setAutoExposureLock(false);
+                camera_controller.setAutoWhiteBalanceLock(false);
             }
             else {
                 camera_controller.setCameraExtension(false, 0);
