@@ -732,6 +732,12 @@ public class CameraController2 extends CameraController {
         private boolean setAEMode(CaptureRequest.Builder builder, boolean is_still) {
             if( MyDebug.LOG )
                 Log.d(TAG, "setAEMode");
+
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+                return false;
+            }
+
             if( has_iso ) {
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "manual mode");
@@ -4127,7 +4133,7 @@ public class CameraController2 extends CameraController {
 
     @Override
     public boolean isCameraExtension() {
-        return camera != null && hasCaptureSession() && this.sessionType == SessionType.SESSIONTYPE_EXTENSION;
+        return this.sessionType == SessionType.SESSIONTYPE_EXTENSION;
     }
 
     @Override
@@ -5477,6 +5483,15 @@ public class CameraController2 extends CameraController {
             }
             else if( want_raw ) {
                 throw new RuntimeException("want_raw not supported for extension session");
+            }
+            else if( camera_settings.has_iso ) {
+                throw new RuntimeException("has_iso not supported for extension session");
+            }
+            else if( camera_settings.ae_target_fps_range != null ) {
+                throw new RuntimeException("ae_target_fps_range not supported for extension session");
+            }
+            else if( camera_settings.sensor_frame_duration > 0 ) {
+                throw new RuntimeException("sensor_frame_duration not supported for extension session");
             }
         }
 

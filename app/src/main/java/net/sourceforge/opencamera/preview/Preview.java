@@ -1896,6 +1896,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             int extension = applicationInterface.getCameraExtensionPref();
             if( this.supported_extensions.contains(extension) ) {
                 camera_controller.setCameraExtension(true, extension);
+
+                // also filter unsupported flash modes
+                if( supported_flash_values != null ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "restrict flash modes for extension session");
+                    List<String> new_supported_flash_values = new ArrayList<>();
+                    for(String supported_flash_value : supported_flash_values) {
+                        switch( supported_flash_value ) {
+                            case "flash_off":
+                            case "flash_frontscreen_torch":
+                                new_supported_flash_values.add(supported_flash_value);
+                                break;
+                        }
+                    }
+                    supported_flash_values = new_supported_flash_values;
+                }
             }
             else {
                 camera_controller.setCameraExtension(false, 0);
@@ -2552,7 +2568,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "saved iso: " + value);
         boolean is_manual_iso = false;
-        if( supports_iso_range ) {
+        boolean is_extension = camera_controller.isCameraExtension();
+        if( is_extension ) {
+            // manual ISO not supported for camera extensions
+            camera_controller.setManualISO(false, 0);
+        }
+        else if( supports_iso_range ) {
             // in this mode, we can set any ISO value from min to max
             this.isos = null; // if supports_iso_range==true, caller shouldn't be using getSupportedISOs()
 
@@ -2953,7 +2974,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         // if in manual ISO mode, we'll have restricted the available flash modes - so although we want to
                         // communicate this to the application, we don't want to save the new value we've chosen (otherwise
                         // if user goes to manual ISO and back, we might switch saved flash say from auto to off)
-                        updateFlash(0, !is_manual_iso);
+                        // similarly for camera extension modes
+                        updateFlash(0, !is_manual_iso && !is_extension );
                     }
                 }
                 else {
@@ -4389,7 +4411,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return;
         }
         int [] selected_fps = null;
-        if( this.is_video ) {
+        if( camera_controller.isCameraExtension() ) {
+            // don't set preview fps if using camera extension
+            // (important not to return here however - still want to call
+            // camera_controller.clearPreviewFpsRange() to clear a previously set fps)
+        }
+        else if( this.is_video ) {
             // For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark preview in low light, as described above.
             // When the video recording starts, the preview automatically adjusts, but still good to avoid too-dark preview before the user starts recording.
             // However I'm wary of changing the behaviour for all devices at the moment, since some devices can be
