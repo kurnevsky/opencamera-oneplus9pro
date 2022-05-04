@@ -4120,13 +4120,14 @@ public class CameraController2 extends CameraController {
         if( enabled != (sessionType == SessionType.SESSIONTYPE_EXTENSION) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "turning extension session on or off");
-            // ideally we'd probably only create the previewBuilder when starting the preview (so we
+            // Ideally we'd probably only create the previewBuilder when starting the preview (so we
             // start off with a "fresh" one), but for now at least ensure we start off with a fresh
             // previewBuilder when enabling extensions (and might as well do so when disabling
-            // extensions too)
-            // this is useful for modes like CONTROL_AE_ANTIBANDING_MODE where there isn't an obvious#
+            // extensions too).
+            // This saves us having to set capture request parameters back to their defaults, and is
+            // also useful for modes like CONTROL_AE_ANTIBANDING_MODE where there isn't an obvious
             // "default" to set (in theory extensions mode should just ignore such keys, but it'd be
-            // nicer to never set them)
+            // nicer to never set them).
             previewBuilder = null;
             createPreviewRequest();
         }
