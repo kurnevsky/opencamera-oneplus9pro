@@ -4535,9 +4535,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
 
             if( !during_startup ) {
-                String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
-                if( MyDebug.LOG )
+                if( MyDebug.LOG ) {
+                    String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
                     Log.d(TAG, "focus_value is " + focus_value);
+                }
                 // Although in theory we only need to stop and start preview, which should be faster, reopening the camera allows that to
                 // run on the background thread, thus not freezing the UI
                 // Also workaround for bug on Nexus 6 at least where switching to video and back to photo mode causes continuous picture mode to stop -
