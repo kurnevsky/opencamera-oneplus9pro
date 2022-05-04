@@ -434,7 +434,9 @@ public class CameraController2 extends CameraController {
             //builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
             //builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
 
-            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+            if( sessionType != SessionType.SESSIONTYPE_EXTENSION ) {
+                builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+            }
 
             setSceneMode(builder);
             setColorEffect(builder);
@@ -856,7 +858,10 @@ public class CameraController2 extends CameraController {
         }
 
         private void setFocusMode(CaptureRequest.Builder builder) {
-            if( has_af_mode ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_af_mode ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "change af mode to " + af_mode);
                 builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
@@ -871,7 +876,12 @@ public class CameraController2 extends CameraController {
         private void setFocusDistance(CaptureRequest.Builder builder) {
             if( MyDebug.LOG )
                 Log.d(TAG, "change focus distance to " + focus_distance);
-            builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else {
+                builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+            }
         }
 
         private void setAutoExposureLock(CaptureRequest.Builder builder) {
