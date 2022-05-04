@@ -842,6 +842,10 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "don't set exposure compensation in manual iso mode");
                 return false;
             }
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+                return false;
+            }
             if( builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || ae_exposure_compensation != builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "change exposure to " + ae_exposure_compensation);
