@@ -651,6 +651,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getFaceDetectionPref() {
+        if( isCameraExtensionPref() ) {
+            // not supported for camera extensions
+            return false;
+        }
         return sharedPreferences.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false);
     }
 

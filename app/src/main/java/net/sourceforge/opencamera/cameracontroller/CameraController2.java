@@ -905,7 +905,10 @@ public class CameraController2 extends CameraController {
         }
 
         private void setFaceDetectMode(CaptureRequest.Builder builder) {
-            if( has_face_detect_mode )
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_face_detect_mode )
                 builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
             else
                 builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF);
@@ -5520,6 +5523,12 @@ public class CameraController2 extends CameraController {
             else if( camera_settings.wb_lock ) {
                 throw new RuntimeException("wb_lock not supported for extension session");
             }
+            else if( camera_settings.has_face_detect_mode ) {
+                throw new RuntimeException("has_face_detect_mode not supported for extension session");
+            }
+            else if( face_detection_listener != null ) {
+                throw new RuntimeException("face_detection_listener not supported for extension session");
+            }
         }
 
         try {
@@ -5944,6 +5953,7 @@ public class CameraController2 extends CameraController {
     public boolean startFaceDetection() {
         if( MyDebug.LOG )
             Log.d(TAG, "startFaceDetection");
+        BLOCK_FOR_EXTENSIONS();
         if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "face detection already enabled");
@@ -5984,6 +5994,9 @@ public class CameraController2 extends CameraController {
     
     @Override
     public void setFaceDetectionListener(final FaceDetectionListener listener) {
+        if( listener != null ) {
+            BLOCK_FOR_EXTENSIONS();
+        }
         this.face_detection_listener = listener;
         this.last_faces_detected = -1;
     }
