@@ -675,7 +675,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         // don't set focus areas on touch if the user is touching to unpause!
         // similarly if doing single touch to capture (we go straight to taking a photo)
         // and not supported for camera extensions
-        if( camera_controller != null && !this.using_face_detection && !was_paused && !touch_capture && !applicationInterface.isCameraExtensionPref() ) {
+        if( camera_controller != null && !this.using_face_detection && !was_paused && !touch_capture && !camera_controller.isCameraExtension() ) {
             this.has_focus_area = false;
 
             if( MyDebug.LOG ) {
@@ -795,7 +795,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return;
         }
         // don't cancelAutoFocus() here, otherwise we get sluggish zoom behaviour on Camera2 API
-        if( !applicationInterface.isCameraExtensionPref() ) {
+        if( !camera_controller.isCameraExtension() ) {
             // if using camera extensions, we could never have set focus and metering in the first place
             camera_controller.clearFocusAndMetering();
         }
