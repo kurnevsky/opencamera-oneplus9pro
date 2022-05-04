@@ -893,13 +893,19 @@ public class CameraController2 extends CameraController {
         }
 
         private void setAFRegions(CaptureRequest.Builder builder) {
-            if( af_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( af_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
                 builder.set(CaptureRequest.CONTROL_AF_REGIONS, af_regions);
             }
         }
 
         private void setAERegions(CaptureRequest.Builder builder) {
-            if( ae_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( ae_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
                 builder.set(CaptureRequest.CONTROL_AE_REGIONS, ae_regions);
             }
         }
@@ -5161,6 +5167,7 @@ public class CameraController2 extends CameraController {
     public boolean setFocusAndMeteringArea(List<Area> areas) {
         if( MyDebug.LOG )
             Log.d(TAG, "setFocusAndMeteringArea");
+        BLOCK_FOR_EXTENSIONS();
         Rect sensor_rect = getViewableRect();
         if( MyDebug.LOG )
             Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
@@ -5208,6 +5215,7 @@ public class CameraController2 extends CameraController {
     public void clearFocusAndMetering() {
         if( MyDebug.LOG )
             Log.d(TAG, "clearFocusAndMetering");
+        BLOCK_FOR_EXTENSIONS();
         Rect sensor_rect = getViewableRect();
         boolean has_focus = false;
         boolean has_metering = false;
