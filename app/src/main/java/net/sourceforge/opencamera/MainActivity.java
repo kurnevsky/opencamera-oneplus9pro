@@ -2812,13 +2812,18 @@ public class MainActivity extends AppCompatActivity {
 
             if( !need_reopen ) {
                 boolean old_is_extension = preview.getCameraController().isCameraExtension();
-                //boolean new_is_extension = applicationInterface.isCameraExtensionPref();
-                if( old_is_extension /*&& new_is_extension*/ ) {
+                boolean new_is_extension = applicationInterface.isCameraExtensionPref();
+                if( old_is_extension || new_is_extension ) {
                     // At least on Galaxy S10e, we have problems stopping and starting a camera extension session,
                     // e.g., when changing resolutions whilst in an extension mode (XHDR or bokeh) or switching
                     // from XHDR to other modes (including non-extension modes like STD). Problems such as preview
                     // no longer receiving frames, or the call to createExtensionSession() (or createCaptureSession)
-                    // hanging.
+                    // hanging. So therefore we should reopen the camera if at least
+                    // old_is_extension==true.
+                    // This isn't required if old_is_extension==false but new_is_extension==true,
+                    // but we still do so since reopening the camera occurs on a background thread
+                    // (opening an extension session seems to take longer, so better not to block
+                    // the UI thread).
                     if( MyDebug.LOG )
                         Log.d(TAG, "need to reopen camera for changes to extension session");
                     need_reopen = true;
