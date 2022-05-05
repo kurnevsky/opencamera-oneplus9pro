@@ -104,6 +104,28 @@ import android.widget.Toast;
  *  supports much of the Open Camera logic and functionality). Communication to
  *  the rest of the application is available through ApplicationInterface.
  *  We could probably do with decoupling this class into separate components!
+ *
+ *  This class also keeps track of various camera parameters, obtained from the
+ *  CameraController class. One decision is when certain parameters depend on
+ *  others (e.g., some resolutions don't support burst; lots of things don't
+ *  support vendor camera extensions). In general we shouldn't do that restriction
+ *  at this level, as that can cause problems since at the Application level we
+ *  may need to know what features are possible in any mode. E.g., if we said
+ *  burst mode isn't supported because we're in a camera extension mode, the user
+ *  wouldn't be able to switch to Fast Burst mode because the application thinks
+ *  burst isn't available! And also for changing preferences in Settings, we
+ *  typically want to show all available settings (e.g., showing RAW if it's
+ *  available for the current camera, even if not available in the current mode).
+ *  There are some exceptions where we need to restrict at the Preview level, e.g.:
+ *    - Resolutions (for burst mode, camera extensions) - though the application
+ *      can choose to obtain the full list by calling getSupportedPictureSizes()
+ *      with check_supported==false.
+ *    - Flash modes (for manual ISO or camera extensions).
+ *    - Focus modes (for camera extensions).
+ *  Similarly we shouldn't restrict available features at the CameraController
+ *  class, except where this is unavoidable due to the Android camera API
+ *  behaviour (e.g., for scene modes, it may be that some camera features are
+ *  affected).
  */
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
     private static final String TAG = "Preview";

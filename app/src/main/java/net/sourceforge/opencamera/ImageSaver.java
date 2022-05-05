@@ -3572,7 +3572,7 @@ public class ImageSaver extends Thread {
         if( MyDebug.LOG )
             Log.d(TAG, "modifyExif");
         setGPSDirectionExif(exif, store_geo_direction, geo_direction);
-        if( store_ypr ){
+        if( store_ypr ) {
             float geo_angle = (float)Math.toDegrees(geo_direction);
             if( geo_angle < 0.0f ) {
                 geo_angle += 360.0f;
