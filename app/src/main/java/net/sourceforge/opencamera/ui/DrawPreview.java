@@ -56,6 +56,8 @@ public class DrawPreview {
     private final MainActivity main_activity;
     private final MyApplicationInterface applicationInterface;
 
+    private boolean cover_preview; // whether to cover the preview for Camera2 API
+
     // store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
     private final SharedPreferences sharedPreferences;
 
@@ -2601,6 +2603,12 @@ public class DrawPreview {
         }
     }
 
+    public void setCoverPreview(boolean cover_preview) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setCoverPreview: " + cover_preview);
+        this.cover_preview = cover_preview;
+    }
+
     public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
@@ -2641,10 +2649,26 @@ public class DrawPreview {
                 preview.disableFocusPeaking();
         }
 
-        // see documentation for CameraController.shouldCoverPreview()
-        if( preview.usingCamera2API() && ( camera_controller == null || camera_controller.shouldCoverPreview() ) ) {
-            p.setColor(Color.BLACK);
-            canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+        // See documentation for CameraController.shouldCoverPreview().
+        // Note, originally we checked camera_controller.shouldCoverPreview() every frame, but this
+        // has the problem that we blank whenever the camera is being reopened, e.g., when switching
+        // cameras or changing photo modes that require a reopen. The intent however is to only
+        // cover up the camera when the application is pausing, and to keep it covered up until
+        // after we've resumed, and the camera has been reopened and we've received frames.
+        if( preview.usingCamera2API() ) {
+            if( cover_preview ) {
+                // see if we have received a frame yet
+                if( camera_controller != null && !camera_controller.shouldCoverPreview() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "no longer need to cover preview");
+                    cover_preview = false;
+                }
+            }
+            if( cover_preview ) {
+                p.setColor(Color.BLACK);
+                //p.setColor(Color.RED); // test
+                canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+            }
         }
 
         if( camera_controller!= null && front_screen_flash ) {

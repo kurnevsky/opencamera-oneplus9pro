@@ -1345,6 +1345,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         this.app_is_paused = false; // must be set before initLocation() at least
 
+        // this is intentionally true, not false, as the uncovering happens in DrawPreview when we receive frames from the camera after it's opened
+        // (this should already have been set from the call in onPause(), but we set it here again just in case)
+        applicationInterface.getDrawPreview().setCoverPreview(true);
+
         cancelImageSavingNotification();
 
         // Set black window background; also needed if we hide the virtual buttons in immersive mode
@@ -1454,6 +1458,7 @@ public class MainActivity extends AppCompatActivity {
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
         preview.onPause();
+        applicationInterface.getDrawPreview().setCoverPreview(true); // must be after we've closed the preview (otherwise risk that further frames from preview will unset the cover_preview flag in DrawPreview)
 
         if( applicationInterface.getImageSaver().getNImagesToSave() > 0) {
             createImageSavingNotification();
