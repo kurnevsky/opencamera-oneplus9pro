@@ -996,11 +996,13 @@
     <string name="permission_rationale_bluetooth_scan_connect">Bluetooth scan/connect permissions are required for discovering and connecting to Bluetooth LE remote control devices.</string>
     <string name="unknown_device_no_permission">Unknown device (bluetooth connect permission not available)</string>
 
-    <string name="photo_mode_x_hdr">XHDR</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_x_hdr">X-HDR</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_x_hdr_full">Extension: HDR</string>
-    <string name="photo_mode_x_bokeh">XBKH</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_x_night">X-Night</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_x_night_full">Extension: Night</string>
+    <string name="photo_mode_x_bokeh">X-Bokeh</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_x_bokeh_full">Extension: Bokeh</string>
-    <string name="photo_mode_x_beauty">XBTY</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_x_beauty">X-Bty</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_x_beauty_full">Extension: Beauty / Face Retouch</string>
 
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->

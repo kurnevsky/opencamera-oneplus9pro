@@ -75,6 +75,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         Panorama,
         // camera vendor extensions:
         X_HDR,
+        X_Night,
         X_Bokeh,
         X_Beauty
     }
@@ -1550,7 +1551,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public boolean isCameraExtensionPref() {
         PhotoMode photo_mode = getPhotoMode();
-        return photo_mode == PhotoMode.X_HDR || photo_mode == PhotoMode.X_Bokeh || photo_mode == PhotoMode.X_Beauty;
+        return photo_mode == PhotoMode.X_HDR || photo_mode == PhotoMode.X_Night || photo_mode == PhotoMode.X_Bokeh || photo_mode == PhotoMode.X_Beauty;
     }
 
     @Override
@@ -1559,6 +1560,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         PhotoMode photo_mode = getPhotoMode();
         if( photo_mode == PhotoMode.X_HDR ) {
             return CameraExtensionCharacteristics.EXTENSION_HDR;
+        }
+        else if( photo_mode == PhotoMode.X_Night ) {
+            return CameraExtensionCharacteristics.EXTENSION_NIGHT;
         }
         else if( photo_mode == PhotoMode.X_Bokeh ) {
             return CameraExtensionCharacteristics.EXTENSION_BOKEH;
@@ -1687,6 +1691,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean x_hdr = photo_mode_pref.equals("preference_photo_mode_x_hdr");
         if( x_hdr && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_HDR) )
             return PhotoMode.X_HDR;
+        boolean x_night = photo_mode_pref.equals("preference_photo_mode_x_night");
+        if( x_night && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_NIGHT) )
+            return PhotoMode.X_Night;
         boolean x_bokeh = photo_mode_pref.equals("preference_photo_mode_x_bokeh");
         if( x_bokeh && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BOKEH) )
             return PhotoMode.X_Bokeh;

@@ -5409,6 +5409,9 @@ public class MainActivity extends AppCompatActivity {
             case X_HDR:
                 photo_mode_string = getResources().getString(R.string.photo_mode_x_hdr_full);
                 break;
+            case X_Night:
+                photo_mode_string = getResources().getString(R.string.photo_mode_x_night_full);
+                break;
             case X_Bokeh:
                 photo_mode_string = getResources().getString(R.string.photo_mode_x_bokeh_full);
                 break;

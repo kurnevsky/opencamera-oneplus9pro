@@ -224,6 +224,10 @@ public class PopupView extends LinearLayout {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_hdr_full : R.string.photo_mode_x_hdr) );
                 photo_mode_values.add( MyApplicationInterface.PhotoMode.X_HDR );
             }
+            if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_NIGHT) ) {
+                photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_night_full : R.string.photo_mode_x_night) );
+                photo_mode_values.add( MyApplicationInterface.PhotoMode.X_Night );
+            }
             if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_BOKEH) ) {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_bokeh_full : R.string.photo_mode_x_bokeh) );
                 photo_mode_values.add( MyApplicationInterface.PhotoMode.X_Bokeh );
@@ -1130,6 +1134,9 @@ public class PopupView extends LinearLayout {
                 case X_HDR:
                     toast_message = getResources().getString(R.string.photo_mode_x_hdr_full);
                     break;
+                case X_Night:
+                    toast_message = getResources().getString(R.string.photo_mode_x_night_full);
+                    break;
                 case X_Bokeh:
                     toast_message = getResources().getString(R.string.photo_mode_x_bokeh_full);
                     break;
@@ -1166,6 +1173,9 @@ public class PopupView extends LinearLayout {
                     break;
                 case X_HDR:
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_hdr");
+                    break;
+                case X_Night:
+                    editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_night");
                     break;
                 case X_Bokeh:
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_bokeh");
