@@ -3152,7 +3152,7 @@ public class ImageSaver extends Thread {
                 exif_new.setAttribute(ExifInterface.TAG_USER_COMMENT, exif_user_comment);
         }
 
-        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
         setDateTimeExif(exif_new);
         exif_new.saveAttributes();
     }
@@ -3520,7 +3520,7 @@ public class ImageSaver extends Thread {
                 try {
                     ExifInterface exif = exif_holder.getExif();
                     if( exif != null ) {
-                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.using_camera_extensions, request.current_date, request.store_location, request.location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
                         exif.saveAttributes();
                     }
                 }
@@ -3568,7 +3568,7 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the exif data, if necessary.
      */
-    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, boolean using_camera_extensions, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright, double level_angle, double pitch_angle, boolean store_ypr) {
+    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, boolean using_camera_extensions, Date current_date, boolean store_location, Location location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright, double level_angle, double pitch_angle, boolean store_ypr) {
         if( MyDebug.LOG )
             Log.d(TAG, "modifyExif");
         setGPSDirectionExif(exif, store_geo_direction, geo_direction);
@@ -3586,6 +3586,10 @@ public class ImageSaver extends Thread {
         setCustomExif(exif, custom_tag_artist, custom_tag_copyright);
         if( using_camera_extensions ) {
             addDateTimeExif(exif, current_date);
+            if( store_location ) {
+                // also need to store geotagging, since Camera API doesn't support doing this for camera extensions
+                exif.setGpsInfo(location);
+            }
         }
         else if( needGPSTimestampHack(is_jpeg, using_camera2, store_location) ) {
             fixGPSTimestamp(exif, current_date);

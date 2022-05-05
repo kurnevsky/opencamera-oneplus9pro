@@ -457,7 +457,10 @@ public class CameraController2 extends CameraController {
             setTonemapProfile(builder);
 
             if( is_still ) {
-                if( location != null ) {
+                if( location != null && sessionType != SessionType.SESSIONTYPE_EXTENSION ) {
+                    // JPEG_GPS_LOCATION not supported for camera extensions, so instead this must
+                    // be set by the caller when receiving the image data (see ImageSaver.modifyExif(),
+                    // where we do this using ExifInterface.setGpsInfo()).
                     builder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
                 }
                 builder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
