@@ -1293,19 +1293,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void zoomIn() {
-        mainUI.changeSeekbar(R.id.zoom_seekbar, -1);
+        if( preview.supportsZoom() ) {
+            mainUI.changeSeekbar(R.id.zoom_seekbar, -1);
+        }
     }
 
     public void zoomOut() {
-        mainUI.changeSeekbar(R.id.zoom_seekbar, 1);
+        if( preview.supportsZoom() ) {
+            mainUI.changeSeekbar(R.id.zoom_seekbar, 1);
+        }
     }
 
     public void changeExposure(int change) {
-        mainUI.changeSeekbar(R.id.exposure_seekbar, change);
+        if( preview.supportsExposures() ) {
+            mainUI.changeSeekbar(R.id.exposure_seekbar, change);
+        }
     }
 
     public void changeISO(int change) {
-        mainUI.changeSeekbar(R.id.iso_seekbar, change);
+        if( preview.supportsISORange() ) {
+            mainUI.changeSeekbar(R.id.iso_seekbar, change);
+        }
     }
 
     public void changeFocusDistance(int change, boolean is_target_distance) {

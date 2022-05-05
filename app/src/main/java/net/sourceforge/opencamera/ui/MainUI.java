@@ -1597,7 +1597,7 @@ public class MainUI {
         if( isExposureUIOpen() ) {
             closeExposureUI();
         }
-        else if( main_activity.getPreview().getCameraController() != null ) {
+        else if( main_activity.getPreview().getCameraController() != null && main_activity.supportsExposureButton() ) {
             setupExposureUI();
             if (main_activity.getBluetoothRemoteControl().remoteEnabled()) {
                 initRemoteControlForExposureUI();
@@ -2767,16 +2767,14 @@ public class MainUI {
                             boolean manual_iso = !value.equals(CameraController.ISO_DEFAULT);
                             if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                                 if(manual_iso) {
-                                    if(main_activity.getPreview().supportsISORange())
-                                        main_activity.changeISO(1);
+                                    main_activity.changeISO(1);
                                 }
                                 else
                                     main_activity.changeExposure(1);
                             }
                             else {
                                 if(manual_iso) {
-                                    if(main_activity.getPreview().supportsISORange())
-                                        main_activity.changeISO(-1);
+                                    main_activity.changeISO(-1);
                                 }
                                 else
                                     main_activity.changeExposure(-1);
