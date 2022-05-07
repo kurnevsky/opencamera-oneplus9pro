@@ -274,6 +274,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean camera_controller_supports_zoom;
     private boolean has_zoom;
     private int max_zoom_factor;
+    public boolean has_zoom_ratio_range; // for multi-camera zoom
+    public float zoom_ratio_low;
+    public float zoom_ratio_high;
     private final GestureDetector gestureDetector;
     private final ScaleGestureDetector scaleGestureDetector;
     private List<Integer> zoom_ratios;
@@ -2216,10 +2219,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( this.has_zoom ) {
                 this.max_zoom_factor = camera_features.max_zoom;
                 this.zoom_ratios = camera_features.zoom_ratios;
+                this.has_zoom_ratio_range = camera_features.has_zoom_ratio_range;
+                if( this.has_zoom_ratio_range ) {
+                    this.zoom_ratio_low = camera_features.zoom_ratio_low;
+                    this.zoom_ratio_high = camera_features.zoom_ratio_high;
+                }
+                else {
+                    this.zoom_ratio_low = 0.0f;
+                    this.zoom_ratio_high = 0.0f;
+                }
             }
             else {
                 this.max_zoom_factor = 0;
                 this.zoom_ratios = null;
+                this.has_zoom_ratio_range = false;
+                this.zoom_ratio_low = 0.0f;
+                this.zoom_ratio_high = 0.0f;
             }
             this.minimum_focus_distance = camera_features.minimum_focus_distance;
             this.supports_face_detection = camera_features.supports_face_detection;
@@ -8488,6 +8503,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.max_zoom_factor;
     }
 
+    public float getZoomRatioLow() {
+        return this.zoom_ratio_low;
+    }
+
+    public float getZoomRatioHigh() {
+        return this.zoom_ratio_high;
+    }
+
     public boolean hasFocusArea() {
         return this.has_focus_area;
     }
@@ -8574,5 +8597,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return 1.0f;
         int zoom_factor = camera_controller.getZoom();
         return this.zoom_ratios.get(zoom_factor)/100.0f;
+    }
+
+    public float getMaxZoomRatio() {
+        if( zoom_ratios == null )
+            return 1.0f;
+        return this.zoom_ratios.get(max_zoom_factor)/100.0f;
     }
 }

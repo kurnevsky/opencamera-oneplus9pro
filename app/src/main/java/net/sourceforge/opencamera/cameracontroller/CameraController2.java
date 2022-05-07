@@ -2521,18 +2521,6 @@ public class CameraController2 extends CameraController {
                     }
                 }
             }
-
-            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ) {
-                Range<Float> zoom_ratio_range = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
-                Log.d(TAG, "zoom_ratio_range:");
-                if( zoom_ratio_range == null ) {
-                    Log.d(TAG, "    not supported");
-                }
-                else {
-                    Log.d(TAG, "    min zoom ratio: " + zoom_ratio_range.getLower());
-                    Log.d(TAG, "    max zoom ratio: " + zoom_ratio_range.getUpper());
-                }
-            }
         }
 
         float max_zoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
@@ -2562,6 +2550,25 @@ public class CameraController2 extends CameraController {
         }
         else {
             this.zoom_ratios = null;
+        }
+
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ) {
+            Range<Float> zoom_ratio_range = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "zoom_ratio_range:");
+                if( zoom_ratio_range == null ) {
+                    Log.d(TAG, "    not supported");
+                }
+                else {
+                    Log.d(TAG, "    min zoom ratio: " + zoom_ratio_range.getLower());
+                    Log.d(TAG, "    max zoom ratio: " + zoom_ratio_range.getUpper());
+                }
+            }
+            if( zoom_ratio_range != null ) {
+                camera_features.has_zoom_ratio_range = true;
+                camera_features.zoom_ratio_low = zoom_ratio_range.getLower();
+                camera_features.zoom_ratio_high = zoom_ratio_range.getUpper();
+            }
         }
 
         int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
