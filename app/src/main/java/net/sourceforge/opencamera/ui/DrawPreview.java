@@ -170,6 +170,8 @@ public class DrawPreview {
         // no longer bother with a focus bracketing icon - hard to come up with a clear icon, and should be obvious from the two on-screen seekbars
     private Bitmap burst_bitmap;
     private Bitmap nr_bitmap;
+    private Bitmap x_bokeh_bitmap;
+    private Bitmap x_beauty_bitmap;
     private Bitmap photostamp_bitmap;
     private Bitmap flash_bitmap;
     private Bitmap face_detection_bitmap;
@@ -264,6 +266,8 @@ public class DrawPreview {
         //focus_bracket_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.focus_bracket_icon);
         burst_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_burst_mode_white_48dp);
         nr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nr_icon);
+        x_bokeh_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_portrait_white_48);
+        x_beauty_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_face_retouching_natural_white_48);
         photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
         flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
         face_detection_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_face_white_48dp);
@@ -328,6 +332,14 @@ public class DrawPreview {
         if( nr_bitmap != null ) {
             nr_bitmap.recycle();
             nr_bitmap = null;
+        }
+        if( x_bokeh_bitmap != null ) {
+            x_bokeh_bitmap.recycle();
+            x_bokeh_bitmap = null;
+        }
+        if( x_beauty_bitmap != null ) {
+            x_beauty_bitmap.recycle();
+            x_beauty_bitmap = null;
         }
         if( photostamp_bitmap != null ) {
             photostamp_bitmap.recycle();
@@ -1373,7 +1385,9 @@ public class DrawPreview {
                             photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
                             //photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
                             photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
-                            photoMode == MyApplicationInterface.PhotoMode.NoiseReduction
+                            photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ||
+                            photoMode == MyApplicationInterface.PhotoMode.X_Bokeh ||
+                            photoMode == MyApplicationInterface.PhotoMode.X_Beauty
             ) &&
                     !applicationInterface.isVideoPref() ) { // these photo modes not supported for video mode
                 icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
@@ -1389,6 +1403,8 @@ public class DrawPreview {
                                             //photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
                                                     photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
                                                             photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
+                                                                    photoMode == MyApplicationInterface.PhotoMode.X_Bokeh ? x_bokeh_bitmap :
+                                                                            photoMode == MyApplicationInterface.PhotoMode.X_Beauty ? x_beauty_bitmap :
                                                                     null;
                 if( bitmap != null ) {
                     if( photoMode == MyApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
