@@ -517,6 +517,11 @@ public class MainUI {
                     layoutParams.height = button_size;
                     this_view.setLayoutParams(layoutParams);
                 }
+                // except for gallery, which still needs its margins set for navigation gap!
+                view = main_activity.findViewById(R.id.gallery);
+                layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                setMarginsForSystemUI(layoutParams, 0, 0, navigation_gap, 0);
+                view.setLayoutParams(layoutParams);
             }
 
             // end icon panel
