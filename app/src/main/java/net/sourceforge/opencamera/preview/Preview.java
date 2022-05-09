@@ -2494,6 +2494,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 }
                 camera_controller.setFaceDetectionListener(new MyFaceDetectionListener());
             }
+            else {
+                camera_controller.setFaceDetectionListener(null);
+            }
         }
         if( MyDebug.LOG ) {
             Log.d(TAG, "setupCameraParameters: time after setting face detection: " + (System.currentTimeMillis() - debug_time));
