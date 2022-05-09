@@ -300,7 +300,7 @@
     <string name="permission_rationale_camera">カメラを有効にするにはカメラの権限が必要です</string>
     <string name="permission_rationale_record_audio">音声付き動画の撮影と音声コントロールを使用するにはマイクの権限が必要です</string>
     <string name="permission_rationale_location">ジオタギング(位置情報を写真やビデオに付加する)には位置情報の権限が必要です。
-        位置情報の権限はBluetooth LE リモートコントロールデバイスの接続にも必要です。</string>
+        位置情報の権限はBluetooth LE リモートコントロールデバイスの接続にも必要です (Android 11 or earlier)。</string>
 
     <string name="preference_category_photo_debugging">デバッグ用オプション</string>
     <string name="preference_category_video_debugging">デバッグ用オプション</string>

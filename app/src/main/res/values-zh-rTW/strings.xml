@@ -304,7 +304,7 @@
     <string name="permission_rationale_camera">需要相機權限來啟用相機</string>
     <string name="permission_rationale_record_audio">錄製具有音訊的影片和語音控制需要麥克風權限</string>
     <string name="permission_rationale_location">地理標記需要位置權限（在照片和影片中儲存位置資訊）。
-        連線到藍牙低功耗遠端控制裝置也需要位置權限。</string>
+        連線到藍牙低功耗遠端控制裝置也需要位置權限  (Android 11 or earlier)。</string>
 
     <string name="preference_category_photo_debugging">除錯選項</string>
     <string name="preference_category_video_debugging">除錯選項</string>
