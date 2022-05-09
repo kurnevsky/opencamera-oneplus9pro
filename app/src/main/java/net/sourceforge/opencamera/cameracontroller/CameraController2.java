@@ -4783,6 +4783,7 @@ public class CameraController2 extends CameraController {
     public void setFocusValue(String focus_value) {
         if( MyDebug.LOG )
             Log.d(TAG, "setFocusValue: " + focus_value);
+        BLOCK_FOR_EXTENSIONS();
         int focus_mode;
         switch(focus_value) {
             case "focus_mode_auto":
@@ -5331,6 +5332,8 @@ public class CameraController2 extends CameraController {
     public boolean supportsAutoFocus() {
         if( previewBuilder == null )
             return false;
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION )
+            return false;
         Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
         if( focus_mode == null )
             return false;
@@ -5348,6 +5351,8 @@ public class CameraController2 extends CameraController {
     public boolean focusIsContinuous() {
         if( previewBuilder == null )
             return false;
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION )
+            return false;
         Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
         if( focus_mode == null )
             return false;
@@ -5359,6 +5364,8 @@ public class CameraController2 extends CameraController {
     @Override
     public boolean focusIsVideo() {
         if( previewBuilder == null )
+            return false;
+        if( sessionType == SessionType.SESSIONTYPE_EXTENSION )
             return false;
         Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
         if( focus_mode == null )
@@ -5891,7 +5898,7 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "startPreview");
 
-        if( !camera_settings.has_af_mode && initial_focus_mode != null ) {
+        if( !camera_settings.has_af_mode && initial_focus_mode != null && sessionType != SessionType.SESSIONTYPE_EXTENSION ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "user didn't specify focus, so set to: " + initial_focus_mode);
             // If the caller hasn't set a focus mode, but focus modes are supported, it's still better to explicitly set one rather than leaving to the
@@ -6206,6 +6213,7 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "setCaptureFollowAutofocusHint");
             Log.d(TAG, "capture_follows_autofocus_hint? " + capture_follows_autofocus_hint);
         }
+        BLOCK_FOR_EXTENSIONS();
         synchronized( background_camera_lock ) {
             this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
         }
@@ -6270,6 +6278,9 @@ public class CameraController2 extends CameraController {
     public void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb) {
         if( MyDebug.LOG )
             Log.d(TAG, "setContinuousFocusMoveCallback");
+        if( cb != null ) {
+            BLOCK_FOR_EXTENSIONS();
+        }
         this.continuous_focus_move_callback = cb;
     }
 

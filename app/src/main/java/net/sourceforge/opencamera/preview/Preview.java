@@ -1942,6 +1942,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     supported_flash_values = new_supported_flash_values;
                 }
 
+                // also disallow focus modes
+                if( supported_focus_values != null ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "restrict focus modes for extension session");
+                    supported_focus_values = null;
+                }
+
                 // and disable ae and awb lock (as normally we don't set this when stopping/starting preview)
                 camera_controller.setAutoExposureLock(false);
                 camera_controller.setAutoWhiteBalanceLock(false);
