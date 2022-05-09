@@ -4592,6 +4592,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // at the least, we need to reopen camera when: ( !is_video && focus_value != null && focus_value.equals("focus_mode_continuous_picture") ).
                 // Lastly, note that it's important to still call setupCamera() when switching between photo and video modes (see comment for setupCamera()).
                 // So if we ever allow stopping/starting the preview again, we still need to call setupCamera() again.
+                // Update: and even if we want to go back to just stopping/starting the preview, it's likely still a good idea to reopen the camera when
+                // switching from/to vendor camera extensions, otherwise risk of hangs/crashes on at least some devices (see note in MainActivity.updateForSettings)
                 this.reopenCamera();
             }
 
