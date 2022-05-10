@@ -161,7 +161,15 @@ public class MainUI {
             rotate_by += 360.0f;
         // view.animate() modifies the view's rotation attribute, so it ends up equivalent to view.setRotation()
         // we use rotationBy() instead of rotation(), so we get the minimal rotation for clockwise vs anti-clockwise
-        view.animate().rotationBy(rotate_by).setDuration(view_rotate_animation_duration).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        if( main_activity.is_test && Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+            // We randomly get a java.lang.ArrayIndexOutOfBoundsException crash when running MainTests suite
+            // on Android emulator with Android 4.3, from deep below ViewPropertyAnimator.start().
+            // Unclear why this is - I haven't seen this on real devices and can't find out info about it.
+            view.setRotation(ui_rotation);
+        }
+        else {
+            view.animate().rotationBy(rotate_by).setDuration(view_rotate_animation_duration).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        }
     }
 
     public void layoutUI() {
