@@ -311,12 +311,21 @@ public class PermissionHandler {
             case MY_PERMISSIONS_REQUEST_LOCATION:
             {
                 // If request is cancelled, the result arrays are empty.
-                if( grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                if( grantResults.length == 2 && (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED) ) {
+                    // On Android 12 users can choose to only grant approximation location. This means
+                    // one of the permissions will be denied, but as long as one location permission
+                    // is granted, we can still go ahead and use location.
+                    // Otherwise we have a problem that if user selects approximate location, we end
+                    // up turning the location option back off.
                     if( MyDebug.LOG )
-                        Log.d(TAG, "location permission granted");
+                        Log.d(TAG, "location permission granted [1]");
+                    main_activity.initLocation();
+                }
+                else if( grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
+                    // in theory this code path is now redundant, but keep here just in case
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "location permission granted [2]");
                     main_activity.initLocation();
                 }
                 else {
