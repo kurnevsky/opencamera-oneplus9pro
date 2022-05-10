@@ -10,7 +10,6 @@ public class OldDeviceTests {
 
         // put these tests first as they require various permissions be allowed, that can only be set by user action
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationSettings"));
 
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveModes"));
