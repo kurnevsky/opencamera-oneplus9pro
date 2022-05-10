@@ -9469,25 +9469,29 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         assertNotNull(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-        assertNotNull(exif.getAttribute(ExifInterface.TAG_MAKE));
-        assertNotNull(exif.getAttribute(ExifInterface.TAG_MODEL));
-        if( expect_gps ) {
-            assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-            assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
-            assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-            assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
-            // can't read custom tags, even though we can write them?!
-            //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION) != null);
-            //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION_REF) != null);
-        }
-        else {
-            assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-            assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
-            assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-            assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
-            // can't read custom tags, even though we can write them?!
-            //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION) == null);
-            //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION_REF) == null);
+        if( !(isEmulator() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) ) {
+            // older Android emulator versions don't store exif info in photos
+            assertNotNull(exif.getAttribute(ExifInterface.TAG_MAKE));
+            assertNotNull(exif.getAttribute(ExifInterface.TAG_MODEL));
+
+            if( expect_gps ) {
+                assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+                assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                assertNotNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+                // can't read custom tags, even though we can write them?!
+                //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION) != null);
+                //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION_REF) != null);
+            }
+            else {
+                assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+                assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                assertNull(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+                // can't read custom tags, even though we can write them?!
+                //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION) == null);
+                //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION_REF) == null);
+            }
         }
 
         if( inputStream != null ) {
