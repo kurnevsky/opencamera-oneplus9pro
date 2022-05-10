@@ -3152,6 +3152,26 @@ public class MainActivity extends AppCompatActivity {
                             showUnderNavigation(true);
                         }
                     }
+
+                    // see comments in MainUI.layoutUI() for why we don't use this
+                    /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && getSystemOrientation() == SystemOrientation.LANDSCAPE ) {
+                        Rect privacy_indicator_rect = insets.getPrivacyIndicatorBounds();
+                        if( privacy_indicator_rect != null ) {
+                            Rect window_bounds = getWindowManager().getCurrentWindowMetrics().getBounds();
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "privacy_indicator_rect: " + privacy_indicator_rect);
+                                Log.d(TAG, "window_bounds: " + window_bounds);
+                            }
+                            privacy_indicator_gap = window_bounds.right - privacy_indicator_rect.left;
+                            if( privacy_indicator_gap < 0 )
+                                privacy_indicator_gap = 0; // just in case??
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "privacy_indicator_gap: " + privacy_indicator_gap);
+                        }
+                    }
+                    else {
+                        privacy_indicator_gap = 0;
+                    }*/
                     return getWindow().getDecorView().getRootView().onApplyWindowInsets(insets);
                 }
             });

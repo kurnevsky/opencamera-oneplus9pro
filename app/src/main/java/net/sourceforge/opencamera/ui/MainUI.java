@@ -336,6 +336,8 @@ public class MainUI {
         final int display_height = Math.min(display_size.x, display_size.y);
 
         final float scale = main_activity.getResources().getDisplayMetrics().density;
+        if( MyDebug.LOG )
+            Log.d(TAG, "scale: " + scale);
 
         /*int navigation_gap = 0;
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
@@ -351,9 +353,34 @@ public class MainUI {
             }
         }*/
         int navigation_gap = main_activity.getNavigationGap();
+        int gallery_navigation_gap = navigation_gap;
+
+        int gallery_top_gap = 0;
+        {
+            // Leave space for the Android 12+ camera privacy indicator, as gallery icon would
+            // otherwise overlap when in landscape orientation.
+            // In theory we should use WindowInsets.getPrivacyIndicatorBounds() for this, but it seems
+            // to give a much larger value when required (leaving to a much larger gap), as well as
+            // obviously changing depending on orientation - but whilst this is only an issue for
+            // landscape orientation, it looks better to keep the position consistent for any
+            // orientation (otherwise the icons jump about when changing orientation, which looks
+            // especially bad for UIPLACEMENT_RIGHT.
+            // Not needed for UIPLACEMENT_LEFT - although still adjust the right hand side margin
+            // for consistency.
+            // We do for all Android versions for consistency (avoids testing overhead due to
+            // different behaviour on different Android versions).
+            if( ui_placement != UIPlacement.UIPLACEMENT_LEFT ) {
+                // if we did want to do this for UIPLACEMENT_LEFT for consistency, it'd be the
+                // "bottom" margin we need to change.
+                gallery_top_gap = (int) (24 * scale + 0.5f); // convert dps to pixels
+            }
+            int privacy_indicator_gap = (int) (24 * scale + 0.5f); // convert dps to pixels
+            gallery_navigation_gap += privacy_indicator_gap;
+        }
         test_navigation_gap = navigation_gap;
         if( MyDebug.LOG ) {
             Log.d(TAG, "navigation_gap: " + navigation_gap);
+            Log.d(TAG, "gallery_navigation_gap: " + gallery_navigation_gap);
         }
 
         if( !popup_container_only )
@@ -389,7 +416,7 @@ public class MainUI {
                 layoutParams.addRule(below, 0);
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, 0);
-                setMarginsForSystemUI(layoutParams, 0, 0, navigation_gap, 0);
+                setMarginsForSystemUI(layoutParams, 0, gallery_top_gap, gallery_navigation_gap, 0);
                 view.setLayoutParams(layoutParams);
                 setViewRotation(view, ui_rotation);
             }
@@ -510,18 +537,21 @@ public class MainUI {
             }
             else {
                 // need to reset size/margins to their default
-                for(View this_view : buttons_permanent) {
-                    layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
-                    layoutParams.setMargins(0, 0, 0, 0);
-                    layoutParams.width = button_size;
-                    layoutParams.height = button_size;
-                    this_view.setLayoutParams(layoutParams);
-                }
-                // except for gallery, which still needs its margins set for navigation gap!
+                // except for gallery, which still needs its margins set for navigation gap! (and we
+                // shouldn't change it's size, which isn't necessarily button_size)
                 view = main_activity.findViewById(R.id.gallery);
                 layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                setMarginsForSystemUI(layoutParams, 0, 0, navigation_gap, 0);
+                setMarginsForSystemUI(layoutParams, 0, gallery_top_gap, gallery_navigation_gap, 0);
                 view.setLayoutParams(layoutParams);
+                for(View this_view : buttons_permanent) {
+                    if( this_view != view ) {
+                        layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
+                        layoutParams.setMargins(0, 0, 0, 0);
+                        layoutParams.width = button_size;
+                        layoutParams.height = button_size;
+                        this_view.setLayoutParams(layoutParams);
+                    }
+                }
             }
 
             // end icon panel

@@ -165,15 +165,19 @@
         android:visibility="invisible"
         />
 
+    <!-- padding set to 0 to maximise the size of the thumbnail shown; background is transparent for
+        when the thumbnail aspect ratio doesn't match the button aspect ratio, to avoid showing a
+        shaded background
+        -->
     <ImageButton
         android:id="@+id/gallery"
-        android:layout_width="@dimen/onscreen_button_size"
-        android:layout_height="@dimen/onscreen_button_size"
-        android:padding="8dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:padding="0dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/gallery"
         app:srcCompat="@drawable/baseline_photo_library_white_48"
-        android:background="@color/icons_background"
+        android:background="#00000000"
         android:backgroundTint="@color/icons_background_tint"
         android:backgroundTintMode="src_in"
         android:onClick="clickedGallery"
