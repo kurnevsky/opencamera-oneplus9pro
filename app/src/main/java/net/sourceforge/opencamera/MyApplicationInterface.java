@@ -3150,8 +3150,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             paint.setAlpha(255);
         }
         paint.setColor(foreground);
+        if( shadow == Shadow.SHADOW_OUTLINE ) {
+            //noinspection PointlessArithmeticExpression
+            float shadow_radius = (1.0f * scale + 0.5f); // convert pt to pixels
+            shadow_radius = Math.max(shadow_radius, 1.0f);
+            paint.setShadowLayer(shadow_radius, 0.0f, 0.0f, background);
+        }
         canvas.drawText(text, location_x, location_y, paint);
         if( shadow == Shadow.SHADOW_OUTLINE ) {
+            paint.clearShadowLayer(); // set back to default
+        }
+        /*if( shadow == Shadow.SHADOW_OUTLINE ) {
+            // old method (instead of setting shadow layer) - doesn't work correctly on Android 12!
             paint.setColor(background);
             paint.setStyle(Paint.Style.STROKE);
             float current_stroke_width = paint.getStrokeWidth();
@@ -3159,7 +3169,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             canvas.drawText(text, location_x, location_y, paint);
             paint.setStyle(Paint.Style.FILL); // set back to default
             paint.setStrokeWidth(current_stroke_width); // reset
-        }
+        }*/
         return text_bounds.bottom - text_bounds.top;
     }
 
