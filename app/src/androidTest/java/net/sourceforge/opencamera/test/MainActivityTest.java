@@ -90,7 +90,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         super("net.sourceforge.opencamera", MainActivity.class);
     }
 
-    private static boolean isEmulator() {
+    static boolean isEmulator() {
         return Build.MODEL.contains("Android SDK built for x86");
     }
 
