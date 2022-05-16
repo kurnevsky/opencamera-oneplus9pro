@@ -5434,6 +5434,9 @@ public class MainActivity extends AppCompatActivity {
             case Panorama:
                 photo_mode_string = getResources().getString(R.string.photo_mode_panorama_full);
                 break;
+            case X_Auto:
+                photo_mode_string = getResources().getString(R.string.photo_mode_x_auto_full);
+                break;
             case X_HDR:
                 photo_mode_string = getResources().getString(R.string.photo_mode_x_hdr_full);
                 break;

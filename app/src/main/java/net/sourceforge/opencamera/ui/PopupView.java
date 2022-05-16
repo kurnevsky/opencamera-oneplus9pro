@@ -220,6 +220,10 @@ public class PopupView extends LinearLayout {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_focus_bracketing_full : R.string.photo_mode_focus_bracketing) );
                 photo_mode_values.add( MyApplicationInterface.PhotoMode.FocusBracketing );
             }
+            if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_AUTOMATIC) ) {
+                photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_auto_full : R.string.photo_mode_x_auto) );
+                photo_mode_values.add( MyApplicationInterface.PhotoMode.X_Auto );
+            }
             if( main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_HDR) ) {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_x_hdr_full : R.string.photo_mode_x_hdr) );
                 photo_mode_values.add( MyApplicationInterface.PhotoMode.X_HDR );
@@ -1131,6 +1135,9 @@ public class PopupView extends LinearLayout {
                 case Panorama:
                     toast_message = getResources().getString(R.string.photo_mode_panorama_full);
                     break;
+                case X_Auto:
+                    toast_message = getResources().getString(R.string.photo_mode_x_auto_full);
+                    break;
                 case X_HDR:
                     toast_message = getResources().getString(R.string.photo_mode_x_hdr_full);
                     break;
@@ -1170,6 +1177,9 @@ public class PopupView extends LinearLayout {
                     break;
                 case Panorama:
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
+                    break;
+                case X_Auto:
+                    editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_auto");
                     break;
                 case X_HDR:
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_x_hdr");

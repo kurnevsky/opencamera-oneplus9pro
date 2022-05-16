@@ -996,6 +996,8 @@
     <string name="permission_rationale_bluetooth_scan_connect">Bluetooth scan/connect permissions are required for discovering and connecting to Bluetooth LE remote control devices.</string>
     <string name="unknown_device_no_permission">Unknown device (bluetooth connect permission not available)</string>
 
+    <string name="photo_mode_x_auto">X-Auto</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_x_auto_full">Extension: Auto</string>
     <string name="photo_mode_x_hdr">X-HDR</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_x_hdr_full">Extension: HDR</string>
     <string name="photo_mode_x_night">X-Night</string> <!-- keep short, as this shows in the popup menu -->

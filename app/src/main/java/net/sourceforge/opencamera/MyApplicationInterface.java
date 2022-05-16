@@ -74,6 +74,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         NoiseReduction,
         Panorama,
         // camera vendor extensions:
+        X_Auto,
         X_HDR,
         X_Night,
         X_Bokeh,
@@ -1551,14 +1552,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public boolean isCameraExtensionPref() {
         PhotoMode photo_mode = getPhotoMode();
-        return photo_mode == PhotoMode.X_HDR || photo_mode == PhotoMode.X_Night || photo_mode == PhotoMode.X_Bokeh || photo_mode == PhotoMode.X_Beauty;
+        return photo_mode == PhotoMode.X_Auto || photo_mode == PhotoMode.X_HDR || photo_mode == PhotoMode.X_Night || photo_mode == PhotoMode.X_Bokeh || photo_mode == PhotoMode.X_Beauty;
     }
 
     @Override
     @RequiresApi(api = Build.VERSION_CODES.S)
     public int getCameraExtensionPref() {
         PhotoMode photo_mode = getPhotoMode();
-        if( photo_mode == PhotoMode.X_HDR ) {
+        if( photo_mode == PhotoMode.X_Auto ) {
+            return CameraExtensionCharacteristics.EXTENSION_AUTOMATIC;
+        }
+        else if( photo_mode == PhotoMode.X_HDR ) {
             return CameraExtensionCharacteristics.EXTENSION_HDR;
         }
         else if( photo_mode == PhotoMode.X_Night ) {
@@ -1688,6 +1692,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean panorama = photo_mode_pref.equals("preference_photo_mode_panorama");
         if( panorama && !main_activity.getPreview().isVideo() && main_activity.supportsPanorama() )
             return PhotoMode.Panorama;
+        boolean x_auto = photo_mode_pref.equals("preference_photo_mode_x_auto");
+        if( x_auto && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_AUTOMATIC) )
+            return PhotoMode.X_Auto;
         boolean x_hdr = photo_mode_pref.equals("preference_photo_mode_x_hdr");
         if( x_hdr && !main_activity.getPreview().isVideo() && main_activity.supportsCameraExtension(CameraExtensionCharacteristics.EXTENSION_HDR) )
             return PhotoMode.X_HDR;
