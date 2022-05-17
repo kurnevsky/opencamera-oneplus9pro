@@ -2882,7 +2882,7 @@ public class CameraController2 extends CameraController {
                 camera_features.supported_extensions = new ArrayList<>();
                 for(int extension : extensions) {
                     if( MyDebug.LOG )
-                        Log.d(TAG, "extension: " + extension);
+                        Log.d(TAG, "vendor extension: " + extension);
 
                     // we assume that the allowed extension sizes are a subset of the full sizes - makes things easier to manage
 
