@@ -2567,7 +2567,7 @@ public class CameraController2 extends CameraController {
             // set 20 steps per 2x factor
             final int steps_per_2x_factor = 20;
             //final double scale_factor = Math.pow(2.0, 1.0/(double)steps_per_2x_factor);
-            int n_steps =(int)( (steps_per_2x_factor * Math.log(zoom_max_min_ratio + 1.0e-11)) / Math.log(2.0));
+            int n_steps = (int)( (steps_per_2x_factor * Math.log(zoom_max_min_ratio + 1.0e-11)) / Math.log(2.0));
             final double scale_factor = Math.pow(zoom_max_min_ratio, 1.0/(double)n_steps);
             final int n_zoom_one = n_steps/20 + 1; // if min_zoom < 1.0f and max_zoom > 1.0f, then how often to repeat the 1.0x zoom (so the seekbar for zoom is "sticky")
             if( MyDebug.LOG ) {
