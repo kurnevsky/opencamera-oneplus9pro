@@ -170,6 +170,7 @@ public class DrawPreview {
         // no longer bother with a focus bracketing icon - hard to come up with a clear icon, and should be obvious from the two on-screen seekbars
     private Bitmap burst_bitmap;
     private Bitmap nr_bitmap;
+    private Bitmap x_night_bitmap;
     private Bitmap x_bokeh_bitmap;
     private Bitmap x_beauty_bitmap;
     private Bitmap photostamp_bitmap;
@@ -266,6 +267,7 @@ public class DrawPreview {
         //focus_bracket_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.focus_bracket_icon);
         burst_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_burst_mode_white_48dp);
         nr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nr_icon);
+        x_night_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_bedtime_white_48);
         x_bokeh_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_portrait_white_48);
         x_beauty_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_face_retouching_natural_white_48);
         photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
@@ -332,6 +334,10 @@ public class DrawPreview {
         if( nr_bitmap != null ) {
             nr_bitmap.recycle();
             nr_bitmap = null;
+        }
+        if( x_night_bitmap != null ) {
+            x_night_bitmap.recycle();
+            x_night_bitmap = null;
         }
         if( x_bokeh_bitmap != null ) {
             x_bokeh_bitmap.recycle();
@@ -1386,6 +1392,7 @@ public class DrawPreview {
                             //photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
                             photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
                             photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ||
+                            photoMode == MyApplicationInterface.PhotoMode.X_Night ||
                             photoMode == MyApplicationInterface.PhotoMode.X_Bokeh ||
                             photoMode == MyApplicationInterface.PhotoMode.X_Beauty
             ) &&
@@ -1403,8 +1410,9 @@ public class DrawPreview {
                                             //photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
                                                     photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
                                                             photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
-                                                                    photoMode == MyApplicationInterface.PhotoMode.X_Bokeh ? x_bokeh_bitmap :
-                                                                            photoMode == MyApplicationInterface.PhotoMode.X_Beauty ? x_beauty_bitmap :
+                                                                    photoMode == MyApplicationInterface.PhotoMode.X_Night ? x_night_bitmap :
+                                                                        photoMode == MyApplicationInterface.PhotoMode.X_Bokeh ? x_bokeh_bitmap :
+                                                                                photoMode == MyApplicationInterface.PhotoMode.X_Beauty ? x_beauty_bitmap :
                                                                     null;
                 if( bitmap != null ) {
                     if( photoMode == MyApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
@@ -1994,8 +2002,8 @@ public class DrawPreview {
 
             if( preview.supportsZoom() && show_zoom_pref ) {
                 float zoom_ratio = preview.getZoomRatio();
-                // only show when actually zoomed in
-                if( zoom_ratio > 1.0f + 1.0e-5f ) {
+                // only show when actually zoomed in - or out!
+                if( zoom_ratio < 1.0f - 1.0e-5f || zoom_ratio > 1.0f + 1.0e-5f ) {
                     // Convert the dps to pixels, based on density scale
                     p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                     p.setTextAlign(Paint.Align.CENTER);
