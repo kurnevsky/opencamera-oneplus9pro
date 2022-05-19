@@ -86,6 +86,7 @@ public class CameraController2 extends CameraController {
     // camera features that we save (either to avoid repeatedly accessing, or we do our own modification)
     private List<Integer> zoom_ratios;
     private int current_zoom_value;
+    private int zoom_value_1x; // index into zoom_ratios list that is for zoom 1x
     private boolean supports_face_detect_mode_simple;
     private boolean supports_face_detect_mode_full;
     private boolean supports_optical_stabilization;
@@ -373,7 +374,9 @@ public class CameraController2 extends CameraController {
         private long exposure_time = EXPOSURE_TIME_DEFAULT;
         private boolean has_aperture;
         private float aperture;
-        private Rect scalar_crop_region; // no need for has_scalar_crop_region, as we can set to null instead
+        private boolean has_control_zoom_ratio; // zoom for Android 11+
+        private float control_zoom_ratio; // zoom for Android 11+
+        private Rect scalar_crop_region; // zoom for older Android versions; no need for has_scalar_crop_region, as we can set to null instead
         private boolean has_ae_exposure_compensation;
         private int ae_exposure_compensation;
         private boolean has_af_mode;
@@ -443,6 +446,7 @@ public class CameraController2 extends CameraController {
             setWhiteBalance(builder);
             setAntiBanding(builder);
             setAEMode(builder, is_still);
+            setControlZoomRatio(builder);
             setCropRegion(builder);
             setExposureCompensation(builder);
             setFocusMode(builder);
@@ -830,11 +834,20 @@ public class CameraController2 extends CameraController {
             return true;
         }
 
+        private void setControlZoomRatio(CaptureRequest.Builder builder) {
+            if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && has_control_zoom_ratio ) {
+                builder.set(CaptureRequest.CONTROL_ZOOM_RATIO, control_zoom_ratio);
+            }
+        }
+
         private void setCropRegion(CaptureRequest.Builder builder) {
             if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
                 // don't set for extensions
             }
-            else if( scalar_crop_region != null ) {
+            else if( scalar_crop_region != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.R ) {
                 builder.set(CaptureRequest.SCALER_CROP_REGION, scalar_crop_region);
             }
         }
@@ -2523,52 +2536,94 @@ public class CameraController2 extends CameraController {
             }
         }
 
-        float max_zoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
-        camera_features.is_zoom_supported = max_zoom > 0.0f;
-        if( MyDebug.LOG )
+        float min_zoom = 0.0f;
+        float max_zoom = 0.0f;
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ) {
+            // use CONTROL_ZOOM_RATIO_RANGE on Android 11+, to support multiple cameras with zoom ratios
+            // less than 1
+            Range<Float> zoom_ratio_range = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
+            if( zoom_ratio_range != null ) {
+                min_zoom = zoom_ratio_range.getLower();
+                max_zoom = zoom_ratio_range.getUpper();
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "zoom_ratio_range not supported");
+            }
+        }
+        else {
+            min_zoom = 1.0f;
+            max_zoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
+        }
+        camera_features.is_zoom_supported = max_zoom > 0.0f && min_zoom > 0.0f;
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "min_zoom: " + min_zoom);
             Log.d(TAG, "max_zoom: " + max_zoom);
+        }
         if( camera_features.is_zoom_supported ) {
+            float zoom_max_min_ratio = max_zoom / min_zoom;
+            // set a constant number of steps
+            //final int n_steps = 100;
             // set 20 steps per 2x factor
             final int steps_per_2x_factor = 20;
             //final double scale_factor = Math.pow(2.0, 1.0/(double)steps_per_2x_factor);
-            int n_steps =(int)( (steps_per_2x_factor * Math.log(max_zoom + 1.0e-11)) / Math.log(2.0));
-            final double scale_factor = Math.pow(max_zoom, 1.0/(double)n_steps);
+            int n_steps =(int)( (steps_per_2x_factor * Math.log(zoom_max_min_ratio + 1.0e-11)) / Math.log(2.0));
+            final double scale_factor = Math.pow(zoom_max_min_ratio, 1.0/(double)n_steps);
+            final int n_zoom_one = n_steps/20 + 1; // if min_zoom < 1.0f and max_zoom > 1.0f, then how often to repeat the 1.0x zoom (so the seekbar for zoom is "sticky")
             if( MyDebug.LOG ) {
                 Log.d(TAG, "n_steps: " + n_steps);
                 Log.d(TAG, "scale_factor: " + scale_factor);
             }
+
             camera_features.zoom_ratios = new ArrayList<>();
-            camera_features.zoom_ratios.add(100);
-            double zoom = 1.0;
+
+            // add minimum zoom
+            camera_features.zoom_ratios.add((int)(min_zoom*100));
+            if( camera_features.zoom_ratios.get(0)/100.0f < min_zoom ) {
+                // fix for rounding down to less than the min_zoom
+                // e.g. if min_zoom = 0.666, we'd have stored a zoom ratio of 66 which then would
+                // convert back to 0.66
+                camera_features.zoom_ratios.set(0, camera_features.zoom_ratios.get(0) + 1);
+            }
+
+            boolean has_done_one = camera_features.zoom_ratios.get(0) == 100;
+            if( has_done_one ) {
+                zoom_value_1x = 0;
+            }
+
+            double zoom = min_zoom;
             for(int i=0;i<n_steps-1;i++) {
                 zoom *= scale_factor;
-                camera_features.zoom_ratios.add((int)(zoom*100));
+                int zoom_ratio = (int)(zoom*100);
+                if( !has_done_one && zoom_ratio >= 100 ) {
+                    zoom_value_1x = camera_features.zoom_ratios.size();
+                    for(int j=0;j<n_zoom_one;j++)
+                        camera_features.zoom_ratios.add(100);
+                    has_done_one = true;
+                }
+                camera_features.zoom_ratios.add(zoom_ratio);
             }
-            camera_features.zoom_ratios.add((int)(max_zoom*100));
+
+            // add maximum zoom
+            int zoom_ratio = (int)(max_zoom*100);
+            if( !has_done_one && zoom_ratio > 100 ) {
+                zoom_value_1x = camera_features.zoom_ratios.size();
+                for(int j=0;j<n_zoom_one;j++)
+                    camera_features.zoom_ratios.add(100);
+            }
+            else if( !has_done_one ) {
+                zoom_value_1x = camera_features.zoom_ratios.size();
+            }
+            camera_features.zoom_ratios.add(zoom_ratio);
+
             camera_features.max_zoom = camera_features.zoom_ratios.size()-1;
             this.zoom_ratios = camera_features.zoom_ratios;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "zoom_ratios: " + zoom_ratios);
+            }
         }
         else {
             this.zoom_ratios = null;
-        }
-
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ) {
-            Range<Float> zoom_ratio_range = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
-            if( MyDebug.LOG ) {
-                Log.d(TAG, "zoom_ratio_range:");
-                if( zoom_ratio_range == null ) {
-                    Log.d(TAG, "    not supported");
-                }
-                else {
-                    Log.d(TAG, "    min zoom ratio: " + zoom_ratio_range.getLower());
-                    Log.d(TAG, "    max zoom ratio: " + zoom_ratio_range.getUpper());
-                }
-            }
-            if( zoom_ratio_range != null ) {
-                camera_features.has_zoom_ratio_range = true;
-                camera_features.zoom_ratio_low = zoom_ratio_range.getLower();
-                camera_features.zoom_ratio_high = zoom_ratio_range.getUpper();
-            }
         }
 
         int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
@@ -4636,37 +4691,45 @@ public class CameraController2 extends CameraController {
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
         float zoom = zoom_ratios.get(value)/100.0f;
-        Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-        int left = sensor_rect.width()/2;
-        int right = left;
-        int top = sensor_rect.height()/2;
-        int bottom = top;
-        int hwidth = (int)(sensor_rect.width() / (2.0*zoom));
-        int hheight = (int)(sensor_rect.height() / (2.0*zoom));
-        left -= hwidth;
-        right += hwidth;
-        top -= hheight;
-        bottom += hheight;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "zoom: " + zoom);
-            Log.d(TAG, "hwidth: " + hwidth);
-            Log.d(TAG, "hheight: " + hheight);
-            Log.d(TAG, "sensor_rect left: " + sensor_rect.left);
-            Log.d(TAG, "sensor_rect top: " + sensor_rect.top);
-            Log.d(TAG, "sensor_rect right: " + sensor_rect.right);
-            Log.d(TAG, "sensor_rect bottom: " + sensor_rect.bottom);
-            Log.d(TAG, "left: " + left);
-            Log.d(TAG, "top: " + top);
-            Log.d(TAG, "right: " + right);
-            Log.d(TAG, "bottom: " + bottom);
+
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ) {
+            camera_settings.has_control_zoom_ratio = true;
+            camera_settings.control_zoom_ratio = zoom;
+            camera_settings.setControlZoomRatio(previewBuilder);
+        }
+        else {
+            Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+            int left = sensor_rect.width()/2;
+            int right = left;
+            int top = sensor_rect.height()/2;
+            int bottom = top;
+            int hwidth = (int)(sensor_rect.width() / (2.0*zoom));
+            int hheight = (int)(sensor_rect.height() / (2.0*zoom));
+            left -= hwidth;
+            right += hwidth;
+            top -= hheight;
+            bottom += hheight;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "zoom: " + zoom);
+                Log.d(TAG, "hwidth: " + hwidth);
+                Log.d(TAG, "hheight: " + hheight);
+                Log.d(TAG, "sensor_rect left: " + sensor_rect.left);
+                Log.d(TAG, "sensor_rect top: " + sensor_rect.top);
+                Log.d(TAG, "sensor_rect right: " + sensor_rect.right);
+                Log.d(TAG, "sensor_rect bottom: " + sensor_rect.bottom);
+                Log.d(TAG, "left: " + left);
+                Log.d(TAG, "top: " + top);
+                Log.d(TAG, "right: " + right);
+                Log.d(TAG, "bottom: " + bottom);
             /*Rect current_rect = previewBuilder.get(CaptureRequest.SCALER_CROP_REGION);
             Log.d(TAG, "current_rect left: " + current_rect.left);
             Log.d(TAG, "current_rect top: " + current_rect.top);
             Log.d(TAG, "current_rect right: " + current_rect.right);
             Log.d(TAG, "current_rect bottom: " + current_rect.bottom);*/
+            }
+            camera_settings.scalar_crop_region = new Rect(left, top, right, bottom);
+            camera_settings.setCropRegion(previewBuilder);
         }
-        camera_settings.scalar_crop_region = new Rect(left, top, right, bottom);
-        camera_settings.setCropRegion(previewBuilder);
         this.current_zoom_value = value;
         try {
             setRepeatingRequest();
@@ -4680,7 +4743,12 @@ public class CameraController2 extends CameraController {
             e.printStackTrace();
         } 
     }
-    
+
+    @Override
+    public void resetZoom() {
+        setZoom(zoom_value_1x);
+    }
+
     @Override
     public int getExposureCompensation() {
         if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null )

@@ -968,6 +968,11 @@ public class CameraController1 extends CameraController {
         }
     }
 
+    @Override
+    public void resetZoom() {
+        setZoom(0);
+    }
+
     public int getExposureCompensation() {
 		/*Camera.Parameters parameters = this.getParameters();
 		return parameters.getExposureCompensation();*/

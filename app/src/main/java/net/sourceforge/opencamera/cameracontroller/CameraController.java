@@ -61,9 +61,6 @@ public abstract class CameraController {
         public boolean is_zoom_supported;
         public int max_zoom;
         public List<Integer> zoom_ratios;
-        public boolean has_zoom_ratio_range; // for multi-camera zoom
-        public float zoom_ratio_low;
-        public float zoom_ratio_high;
         public boolean supports_face_detection;
         public List<CameraController.Size> picture_sizes;
         public List<CameraController.Size> video_sizes;
@@ -506,6 +503,7 @@ public abstract class CameraController {
     public abstract void setJpegQuality(int quality);
     public abstract int getZoom();
     public abstract void setZoom(int value);
+    public abstract void resetZoom(); // resets to zoom 1x
     public abstract int getExposureCompensation();
     public abstract boolean setExposureCompensation(int new_exposure);
     public abstract void setPreviewFpsRange(int min, int max);

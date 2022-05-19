@@ -2519,9 +2519,8 @@ public class MainActivity extends AppCompatActivity {
         bundle.putBoolean("supports_photo_video_recording", this.preview.supportsPhotoVideoRecording());
         bundle.putFloat("camera_view_angle_x", preview.getViewAngleX(false));
         bundle.putFloat("camera_view_angle_y", preview.getViewAngleY(false));
+        bundle.putFloat("min_zoom_factor", preview.getMinZoomRatio());
         bundle.putFloat("max_zoom_factor", preview.getMaxZoomRatio());
-        bundle.putFloat("zoom_ratio_low", preview.getZoomRatioLow());
-        bundle.putFloat("zoom_ratio_high", preview.getZoomRatioHigh());
 
         putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
         putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());

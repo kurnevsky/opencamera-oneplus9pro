@@ -114,9 +114,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         if( MyDebug.LOG )
             Log.d(TAG, "camera_orientation: " + camera_orientation);
 
+        final float min_zoom_factor = bundle.getFloat("min_zoom_factor");
         final float max_zoom_factor = bundle.getFloat("max_zoom_factor");
-        final float zoom_ratio_low = bundle.getFloat("zoom_ratio_low");
-        final float zoom_ratio_high = bundle.getFloat("zoom_ratio_high");
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
@@ -1206,9 +1205,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                                 about_string.append(last_video_error);
                             }
                         }
+                        about_string.append("\nMin zoom factor: ");
+                        about_string.append(min_zoom_factor);
                         about_string.append("\nMax zoom factor: ");
                         about_string.append(max_zoom_factor);
-                        about_string.append("\nZoom ratio range: " + zoom_ratio_low + " , " + zoom_ratio_high);
                         if( preview_widths != null && preview_heights != null ) {
                             about_string.append("\nPreview resolutions: ");
                             for(int i=0;i<preview_widths.length;i++) {

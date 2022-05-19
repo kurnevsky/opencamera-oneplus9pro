@@ -274,9 +274,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean camera_controller_supports_zoom;
     private boolean has_zoom;
     private int max_zoom_factor;
-    public boolean has_zoom_ratio_range; // for multi-camera zoom
-    public float zoom_ratio_low;
-    public float zoom_ratio_high;
     private final GestureDetector gestureDetector;
     private final ScaleGestureDetector scaleGestureDetector;
     private List<Integer> zoom_ratios;
@@ -2090,7 +2087,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         // must be done after setting parameters, as this function may set parameters
         // also needs to be done after starting preview for some devices (e.g., Nexus 7)
         if( this.has_zoom && applicationInterface.getZoomPref() != 0 ) {
-            zoomTo(applicationInterface.getZoomPref());
+            int zoom_pref = applicationInterface.getZoomPref();
+            if( zoom_pref == -1 ) {
+                zoom_pref = find1xZoom();
+            }
+            zoomTo(zoom_pref);
             if( MyDebug.LOG ) {
                 Log.d(TAG, "setupCamera: total time after zoomTo: " + (System.currentTimeMillis() - debug_time));
             }
@@ -2100,7 +2101,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.d(TAG, "camera supports zoom but application disabled zoom, so reset zoom to default");
             // if the application switches zoom off via ApplicationInterface.allowZoom(), we need to support
             // resetting the zoom (in case the application called setupCamera() rather than reopening the camera).
-            camera_controller.setZoom(0);
+            camera_controller.resetZoom();
         }
 
 	    /*if( take_photo ) {
@@ -2149,6 +2150,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG ) {
             Log.d(TAG, "setupCamera: total time after setupCamera: " + (System.currentTimeMillis() - debug_time));
         }
+    }
+
+    private int find1xZoom() {
+        for(int i=0;i<zoom_ratios.size();i++) {
+            if( zoom_ratios.get(i) == 100 ) {
+                return i;
+            }
+        }
+        return 0; // shouldn't happen but just in case, choose smallest zoom value
     }
 
     public void setupBurstMode() {
@@ -2221,28 +2231,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( MyDebug.LOG )
                 Log.d(TAG, "grab info from parameters");
             CameraController.CameraFeatures camera_features = camera_controller.getCameraFeatures();
-            this.camera_controller_supports_zoom = camera_features.is_zoom_supported;
-            this.has_zoom = camera_features.is_zoom_supported && applicationInterface.allowZoom();
-            if( this.has_zoom ) {
-                this.max_zoom_factor = camera_features.max_zoom;
-                this.zoom_ratios = camera_features.zoom_ratios;
-                this.has_zoom_ratio_range = camera_features.has_zoom_ratio_range;
-                if( this.has_zoom_ratio_range ) {
-                    this.zoom_ratio_low = camera_features.zoom_ratio_low;
-                    this.zoom_ratio_high = camera_features.zoom_ratio_high;
-                }
-                else {
-                    this.zoom_ratio_low = 0.0f;
-                    this.zoom_ratio_high = 0.0f;
-                }
-            }
-            else {
-                this.max_zoom_factor = 0;
-                this.zoom_ratios = null;
-                this.has_zoom_ratio_range = false;
-                this.zoom_ratio_low = 0.0f;
-                this.zoom_ratio_high = 0.0f;
-            }
+
             this.minimum_focus_distance = camera_features.minimum_focus_distance;
             this.supports_face_detection = camera_features.supports_face_detection;
             this.photo_sizes = camera_features.picture_sizes;
@@ -2294,6 +2283,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.video_quality_handler.setVideoSizesHighSpeed(camera_features.video_sizes_high_speed);
             this.supported_preview_sizes = camera_features.preview_sizes;
             this.supported_extensions = camera_features.supported_extensions;
+
+            // need to do zoom last, as applicationInterface.allowZoom() may depend on the supported
+            // camera features (e.g., zoom not supported with camera extensions, so we need to have first
+            // stored supported_extensions - otherwise starting up in an extension photo mode will still
+            // show zoom controls)
+            this.camera_controller_supports_zoom = camera_features.is_zoom_supported;
+            this.has_zoom = camera_features.is_zoom_supported && applicationInterface.allowZoom();
+            if( this.has_zoom ) {
+                this.max_zoom_factor = camera_features.max_zoom;
+                this.zoom_ratios = camera_features.zoom_ratios;
+            }
+            else {
+                this.max_zoom_factor = 0;
+                this.zoom_ratios = null;
+            }
         }
     }
 
@@ -4037,12 +4041,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         int new_zoom_factor = 0;
         if( this.camera_controller != null && this.has_zoom ) {
-            int zoom_factor = camera_controller.getZoom();
+            final int zoom_factor = camera_controller.getZoom();
             float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
             zoom_ratio *= scale_factor;
 
             new_zoom_factor = zoom_factor;
-            if( zoom_ratio <= 1.0f ) {
+            if( zoom_ratio <= zoom_ratios.get(0)/100.0f ) {
                 new_zoom_factor = 0;
             }
             else if( zoom_ratio >= zoom_ratios.get(max_zoom_factor)/100.0f ) {
@@ -8515,14 +8519,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.max_zoom_factor;
     }
 
-    public float getZoomRatioLow() {
-        return this.zoom_ratio_low;
-    }
-
-    public float getZoomRatioHigh() {
-        return this.zoom_ratio_high;
-    }
-
     public boolean hasFocusArea() {
         return this.has_focus_area;
     }
@@ -8609,6 +8605,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return 1.0f;
         int zoom_factor = camera_controller.getZoom();
         return this.zoom_ratios.get(zoom_factor)/100.0f;
+    }
+
+    public float getMinZoomRatio() {
+        if( zoom_ratios == null )
+            return 1.0f;
+        return this.zoom_ratios.get(0)/100.0f;
     }
 
     public float getMaxZoomRatio() {

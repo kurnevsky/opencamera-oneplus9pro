@@ -269,7 +269,7 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 
     @Override
     public int getZoomPref() {
-        return 0;
+        return -1;
     }
 
     @Override

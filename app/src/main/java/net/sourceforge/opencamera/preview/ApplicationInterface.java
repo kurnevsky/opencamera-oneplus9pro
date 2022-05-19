@@ -139,7 +139,7 @@ public interface ApplicationInterface {
     boolean getRecordAudioPref(); // whether to record audio when recording video
     String getRecordAudioChannelsPref(); // either "audio_default", "audio_mono" or "audio_stereo"
     String getRecordAudioSourcePref(); // "audio_src_camcorder" is recommended, but other options are: "audio_src_mic", "audio_src_default", "audio_src_voice_communication", "audio_src_unprocessed" (unprocessed required Android 7+); see corresponding values in android.media.MediaRecorder.AudioSource
-    int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
+    int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom); return -1 for default 1x zoom
     double getCalibratedLevelAngle(); // set to non-zero to calibrate the accelerometer used for the level angles
     boolean canTakeNewPhoto(); // whether taking new photos is allowed (e.g., can return false if queue for processing images would become full)
     boolean imageQueueWouldBlock(int n_raw, int n_jpegs); // called during some burst operations, whether we can allow taking the supplied number of extra photos
