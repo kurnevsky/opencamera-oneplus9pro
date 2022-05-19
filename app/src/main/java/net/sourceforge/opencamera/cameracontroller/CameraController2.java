@@ -385,8 +385,8 @@ public class CameraController2 extends CameraController {
         private float focus_distance_manual; // saved setting when in manual mode (so if user switches to infinity mode and back, we'll still remember the manual focus distance)
         private boolean ae_lock;
         private boolean wb_lock;
-        private MeteringRectangle [] af_regions; // no need for has_scalar_crop_region, as we can set to null instead
-        private MeteringRectangle [] ae_regions; // no need for has_scalar_crop_region, as we can set to null instead
+        private MeteringRectangle [] af_regions; // no need for has_af_regions, as we can set to null instead
+        private MeteringRectangle [] ae_regions; // no need for has_ae_regions, as we can set to null instead
         private boolean has_face_detect_mode;
         private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
         private Integer default_optical_stabilization;
