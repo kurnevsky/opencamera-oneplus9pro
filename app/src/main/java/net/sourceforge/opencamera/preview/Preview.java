@@ -4097,6 +4097,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    /** Zooms to the supplied index (within the zoom_ratios array).
+     * @param new_zoom_factor The index to zoom to.
+     */
     public void zoomTo(int new_zoom_factor) {
         if( MyDebug.LOG )
             Log.d(TAG, "ZoomTo(): " + new_zoom_factor);
