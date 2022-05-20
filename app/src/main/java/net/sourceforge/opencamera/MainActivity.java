@@ -1292,16 +1292,39 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyUp(keyCode, event);
     }
 
-    public void zoomIn() {
-        if( preview.supportsZoom() ) {
-            mainUI.changeSeekbar(R.id.zoom_seekbar, -1);
+    private void zoomByStep(int change) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "zoomByStep: " + change);
+        if( preview.supportsZoom() && change != 0 ) {
+            if( preview.getCameraController() != null ) {
+                // If the minimum zoom is < 1.0, the seekbar will have repeated entries for 1x zoom
+                // (so it's easier for the user to zoom to exactly 1.0x). But if using the -/+ buttons,
+                // volume keys etc to zoom, we want to skip over these repeated values.
+                int zoom_factor = preview.getCameraController().getZoom();
+                int new_zoom_factor = zoom_factor + change;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "new_zoom_factor: " + new_zoom_factor);
+                while( new_zoom_factor > 0 && new_zoom_factor < preview.getMaxZoom() && preview.getZoomRatio(new_zoom_factor) == preview.getZoomRatio() ) {
+                    if( change > 0 )
+                        change++;
+                    else
+                        change--;
+                    new_zoom_factor = zoom_factor + change;
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "skip over constant region: " + new_zoom_factor);
+                }
+            }
+
+            mainUI.changeSeekbar(R.id.zoom_seekbar, -change); // seekbar is opposite direction to zoom array
         }
     }
 
+    public void zoomIn() {
+        zoomByStep(1);
+    }
+
     public void zoomOut() {
-        if( preview.supportsZoom() ) {
-            mainUI.changeSeekbar(R.id.zoom_seekbar, 1);
-        }
+        zoomByStep(-1);
     }
 
     public void changeExposure(int change) {

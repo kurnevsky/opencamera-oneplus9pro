@@ -2562,17 +2562,11 @@ public class CameraController2 extends CameraController {
         }
         if( camera_features.is_zoom_supported ) {
             float zoom_max_min_ratio = max_zoom / min_zoom;
-            // set a constant number of steps
-            //final int n_steps = 100;
             // set 20 steps per 2x factor
             final int steps_per_2x_factor = 20;
-            //final double scale_factor = Math.pow(2.0, 1.0/(double)steps_per_2x_factor);
             int n_steps = (int)( (steps_per_2x_factor * Math.log(zoom_max_min_ratio + 1.0e-11)) / Math.log(2.0));
-            final double scale_factor = Math.pow(zoom_max_min_ratio, 1.0/(double)n_steps);
-            final int n_zoom_one = n_steps/20 + 1; // if min_zoom < 1.0f and max_zoom > 1.0f, then how often to repeat the 1.0x zoom (so the seekbar for zoom is "sticky")
             if( MyDebug.LOG ) {
                 Log.d(TAG, "n_steps: " + n_steps);
-                Log.d(TAG, "scale_factor: " + scale_factor);
             }
 
             camera_features.zoom_ratios = new ArrayList<>();
@@ -2586,34 +2580,56 @@ public class CameraController2 extends CameraController {
                 camera_features.zoom_ratios.set(0, camera_features.zoom_ratios.get(0) + 1);
             }
 
-            boolean has_done_one = camera_features.zoom_ratios.get(0) == 100;
-            if( has_done_one ) {
+            if( camera_features.zoom_ratios.get(0) < 100 ) {
+                int n_steps_below_one = Math.max(1, n_steps/5);
+                // if the min zoom is < 1.0, we add multiple entries for 1x zoom, when using the zoom
+                // seekbar it's easy for the user to zoom to exactly 1x
+                int n_steps_one = Math.max(1, n_steps/20);
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "n_steps_below_one: " + n_steps_below_one);
+                    Log.d(TAG, "n_steps_one: " + n_steps_one);
+                }
+
+                // add rest of zoom values < 1.0f
+                double zoom = min_zoom;
+                final double scale_factor = Math.pow(1.0f / min_zoom, 1.0/(double)n_steps_below_one);
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "scale_factor for below 1.0x: " + scale_factor);
+                }
+                for(int i=0;i<n_steps_below_one-1;i++) {
+                    zoom *= scale_factor;
+                    int zoom_ratio = (int)(zoom*100);
+                    camera_features.zoom_ratios.add(zoom_ratio);
+                }
+
+                // add values for 1.0f
+                zoom_value_1x = camera_features.zoom_ratios.size();
+                for(int i=0;i<n_steps_one;i++)
+                    camera_features.zoom_ratios.add(100);
+            }
+            else {
                 zoom_value_1x = 0;
             }
 
-            double zoom = min_zoom;
-            for(int i=0;i<n_steps-1;i++) {
+            final int n_steps_above_one = Math.max(1, n_steps - camera_features.zoom_ratios.size());
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "n_steps_above_one: " + n_steps_above_one);
+            }
+
+            // add zoom values > 1.0f
+            double zoom = 1.0f;
+            final double scale_factor = Math.pow(max_zoom, 1.0/(double)n_steps_above_one);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "scale_factor for above 1.0x: " + scale_factor);
+            }
+            for(int i=0;i<n_steps_above_one-1;i++) {
                 zoom *= scale_factor;
                 int zoom_ratio = (int)(zoom*100);
-                if( !has_done_one && zoom_ratio >= 100 ) {
-                    zoom_value_1x = camera_features.zoom_ratios.size();
-                    for(int j=0;j<n_zoom_one;j++)
-                        camera_features.zoom_ratios.add(100);
-                    has_done_one = true;
-                }
                 camera_features.zoom_ratios.add(zoom_ratio);
             }
 
             // add maximum zoom
             int zoom_ratio = (int)(max_zoom*100);
-            if( !has_done_one && zoom_ratio > 100 ) {
-                zoom_value_1x = camera_features.zoom_ratios.size();
-                for(int j=0;j<n_zoom_one;j++)
-                    camera_features.zoom_ratios.add(100);
-            }
-            else if( !has_done_one ) {
-                zoom_value_1x = camera_features.zoom_ratios.size();
-            }
             camera_features.zoom_ratios.add(zoom_ratio);
 
             camera_features.max_zoom = camera_features.zoom_ratios.size()-1;

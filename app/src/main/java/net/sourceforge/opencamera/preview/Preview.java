@@ -8616,6 +8616,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.zoom_ratios.get(zoom_factor)/100.0f;
     }
 
+    public float getZoomRatio(int index) {
+        if( zoom_ratios == null )
+            return 1.0f;
+        return this.zoom_ratios.get(index)/100.0f;
+    }
+
     public float getMinZoomRatio() {
         if( zoom_ratios == null )
             return 1.0f;
