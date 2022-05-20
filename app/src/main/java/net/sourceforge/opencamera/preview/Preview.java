@@ -56,6 +56,7 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -7148,6 +7149,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      * https://developer.android.com/reference/android/hardware/camera2/CameraExtensionCharacteristics ).
      */
     public boolean supportsCameraExtension(int extension) {
+        if( extension == CameraExtensionCharacteristics.EXTENSION_HDR ) {
+            // blocked for now, as have yet to be able to test this (seems to have no effect on Galaxy S10e;
+            // not available on Pixel 6 Pro)
+            return false;
+        }
         return this.supported_extensions != null && this.supported_extensions.contains(extension);
     }
 
