@@ -230,6 +230,18 @@ will be available which instead work by making the screen light up (note, front 
     photo. Note that whilst taking a set of focus bracketed photos, you can cancel the set by pressing the "take photo"
     button again. Also see the options "Focus assist" and "Focus peaking" under Settings/Camera preview/
     which may be useful when adjusting the focus distances.</li>
+    <li><b>X- modes</b> - These extension modes enable device specific algorithms or effects that manufacturers have exposed to
+    third party applications (via Android's camera extensions API) (requires Android 12; only available on some devices,
+        and if Camera2 API is used).
+        <ul>
+            <li><b>X-Auto:</b> Allows the device to choose which algorithm to use based on the current scene. Note this differs to
+            "STD" mode in that it allows the use of the other camera extensions e.g. Night mode for low light scenes.</li>
+            <li><b>X-Night:</b> Improves image quality under low light conditions.</li>
+            <li><b>X-Bokeh:</b> Blurs the background of photos. This is typically intended when taking portraits of people.</li>
+            <li><b>X-Bty:</b> Face retouch or "beauty", applies cosmetic effects to people's faces.</li>
+        </ul>
+        Note many features are unavailable when using an extension mode, including flash, zoom and manual controls.
+    </li>
 </ul></li>
 <li><b>Auto-level</b> - Enable the auto-level feature for photos (see
 <a href="#auto_stabilise">below</a>). (Only available if the device has enough memory.)</li>
@@ -341,6 +353,7 @@ algorithm is in reducing noise and enhancing detail.</li>
 <li>If you have a Google Pixel with Pixel Visual Core, you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
 is generally little benefit to using Open Camera's NR mode on these devices. See "Does Open Camera support HDR+" in the
 <a href="#faq">FAQ</a> for more details.</li>
+<li>If the photo mode "X-Night" is available, this may get better results for low light scenes.</li>
 </ul>
 
 <p>In Noise Reduction photo mode, an additional "NR mode" option will appear on the popup mode. This defaults to Normal, but
