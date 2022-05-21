@@ -6125,17 +6125,19 @@ public class CameraController2 extends CameraController {
        If do_af_trigger_for_continuous is true, we set CONTROL_AF_TRIGGER_START, and wait for
        CONTROL_AF_STATE_FOCUSED_LOCKED or CONTROL_AF_STATE_NOT_FOCUSED_LOCKED, similar to other focus
        methods.
-       do_af_trigger_for_continuous==true has advantages:
+       do_af_trigger_for_continuous==true used to have advantages:
          - On Nexus 6 for flash auto, it means ae state is set to FLASH_REQUIRED if it is required
            when it comes to taking the photo. If do_af_trigger_for_continuous==false, sometimes
            it's set to CONTROL_AE_STATE_CONVERGED even for dark scenes, so we think we can skip
            the precapture, causing photos to come out dark (or we can force always doing precapture,
            but that makes things slower when flash isn't needed)
+           Update: this now seems hard to reproduce.
          - On OnePlus 3T, with do_af_trigger_for_continuous==false photos come out with blue tinge
            if the scene is not dark (but still dark enough that you'd want flash).
            do_af_trigger_for_continuous==true fixes this for cases where the flash fires for autofocus.
            Note that the problem is still not fixed for flash on where the scene is bright enough to
            not need flash (and so we don't fire flash for autofocus).
+           Update: now fixed by setting TEMPLATE_PREVIEW for the precaptureBuilder.
        do_af_trigger_for_continuous==true has disadvantage:
          - On both Nexus 6 and OnePlus 3T, taking photos with flash is longer, as we have flash firing
            for autofocus and precapture. Though note this is the case with autofocus mode anyway.
@@ -6143,8 +6145,7 @@ public class CameraController2 extends CameraController {
        af trigger for fake flash mode can sometimes mean flash fires for too long and we get a worse
        result).
      */
-    //private final static boolean do_af_trigger_for_continuous = false;
-    private final static boolean do_af_trigger_for_continuous = true;
+    private final static boolean do_af_trigger_for_continuous = false;
 
     @Override
     public void autoFocus(final AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
@@ -7423,9 +7424,12 @@ public class CameraController2 extends CameraController {
                     Log.e(TAG, "shouldn't be doing precapture for burst - should be using fake precapture!");
             }
             try {
-                // use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
-                final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-                precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+                // Use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again.
+                // Important that this is TEMPLATE_PREVIEW not TEMPLATE_STILL_CAPTURE, otherwise we have various problems with flash:
+                // * Flash won't fire on Galaxy devices.
+                // * End up with blue tinge on OnePlus 3T.
+                // * Flash auto produces blue tinge and leaves torch on for Pixel 6 Pro.
+                final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
                 camera_settings.setupBuilder(precaptureBuilder, false);
                 precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);

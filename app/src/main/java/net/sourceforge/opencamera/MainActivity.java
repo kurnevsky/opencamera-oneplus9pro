@@ -739,36 +739,32 @@ public class MainActivity extends AppCompatActivity {
     void setDeviceDefaults() {
         if( MyDebug.LOG )
             Log.d(TAG, "setDeviceDefaults");
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
-        boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+        //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
+        //boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
         //boolean is_nexus = Build.MODEL.toLowerCase(Locale.US).contains("nexus");
         //boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
         //boolean is_pixel_phone = Build.DEVICE != null && Build.DEVICE.equals("sailfish");
         //boolean is_pixel_xl_phone = Build.DEVICE != null && Build.DEVICE.equals("marlin");
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "is_samsung? " + is_samsung);
-            Log.d(TAG, "is_oneplus? " + is_oneplus);
+        /*if( MyDebug.LOG ) {
+            //Log.d(TAG, "is_samsung? " + is_samsung);
+            //Log.d(TAG, "is_oneplus? " + is_oneplus);
             //Log.d(TAG, "is_nexus? " + is_nexus);
             //Log.d(TAG, "is_nexus6? " + is_nexus6);
             //Log.d(TAG, "is_pixel_phone? " + is_pixel_phone);
             //Log.d(TAG, "is_pixel_xl_phone? " + is_pixel_xl_phone);
-        }
-        if( is_samsung || is_oneplus ) {
-            // workaround needed for Samsung Galaxy S7 at least (tested on Samsung RTL)
-            // workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
-            // update for v1.37: significant improvements have been made for standard flash and Camera2 API. But OnePlus 3T still has problem
-            // that photos come out with a blue tinge if flash is on, and the scene is bright enough not to need it; Samsung devices also seem
-            // to work okay, testing on S7 on RTL, but still keeping the fake flash mode in place for these devices, until we're sure of good
-            // behaviour
-            // update for testing on Galaxy S10e: still needs fake flash
-            // has also been reported to me that OnePlus 8 and 8 Pro have problems with flash on Camera2 API unless fake flash enabled
+        }*/
+        /*if( is_samsung || is_oneplus ) {
+            // The problems we used to have on Samsung Galaxy devices are now fixed, by setting
+            // TEMPLATE_PREVIEW for the precaptureBuilder in CameraController2. This also fixes the
+            // problems with OnePlus 3T having blue tinge if flash is on, and the scene is bright
+            // enough not to need it
             if( MyDebug.LOG )
                 Log.d(TAG, "set fake flash for camera2");
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
             editor.apply();
-        }
+        }*/
 		/*if( is_nexus6 ) {
 			// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
 			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
