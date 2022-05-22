@@ -2087,7 +2087,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         // must be done after setting parameters, as this function may set parameters
         // also needs to be done after starting preview for some devices (e.g., Nexus 7)
-        if( this.has_zoom && applicationInterface.getZoomPref() != 0 ) {
+        if( this.has_zoom ) {
             int zoom_pref = applicationInterface.getZoomPref();
             if( zoom_pref == -1 ) {
                 zoom_pref = find1xZoom();
