@@ -5556,8 +5556,8 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "camera: " + camera);
         try {
             previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            previewIsVideoMode = false;
             previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
+            previewIsVideoMode = false;
             camera_settings.setupBuilder(previewBuilder, false);
             if( MyDebug.LOG )
                 Log.d(TAG, "successfully created preview request");
@@ -6472,8 +6472,9 @@ public class CameraController2 extends CameraController {
                         Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
                     }
                 }
-                stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-                stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+                // important to use TEMPLATE_MANUAL for manual exposure: this fixes bug on Pixel 6 Pro where manual exposure is ignored when longer than the
+                // preview exposure time (oddly Galaxy S10e has the same bug since Android 11, but that isn't fixed with using TEMPLATE_MANUAL)
+                stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : camera_settings.has_iso ? CameraDevice.TEMPLATE_MANUAL : CameraDevice.TEMPLATE_STILL_CAPTURE);
                 stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
                 camera_settings.setupBuilder(stillBuilder, true);
                 if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
@@ -6726,10 +6727,17 @@ public class CameraController2 extends CameraController {
                 }
                 int n_dummy_requests = 0;
 
-                CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-                stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+                CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_MANUAL);
+                // Needs to be TEMPLATE_MANUAL! Otherwise first image in burst may come out incorrectly (on Pixel 6 Pro,
+                // the first image incorrectly had HDR+ applied, which we don't want here).
                 // n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
                 camera_settings.setupBuilder(stillBuilder, true);
+
+                if( MyDebug.LOG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O  ) {
+                    Boolean zsl = stillBuilder.get(CaptureRequest.CONTROL_ENABLE_ZSL);
+                    Log.d(TAG, "CONTROL_ENABLE_ZSL: " + (zsl==null ? "null" : zsl));
+                }
+
                 clearPending();
                 // shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
                 // but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
