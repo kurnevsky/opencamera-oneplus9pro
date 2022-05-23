@@ -746,15 +746,75 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     //@SuppressLint("ClickableViewAccessibility") @Override
 
+    // When pinch zooming, we'd normally have the problem that zooming is too fast, because we can
+    // only zoom to the limited set of values in the zoom_ratios array. So when pinch zooming, we
+    // keep track of the fractional scaled zoom.
+    private boolean has_smooth_zoom = false;
+    private float smooth_zoom = 1.0f;
+
     /** Handle multitouch zoom.
      */
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        private boolean has_multitouch_start_zoom_factor = false;
+        private int multitouch_start_zoom_factor = 0;
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             if( Preview.this.camera_controller != null && Preview.this.has_zoom ) {
                 Preview.this.scaleZoom(detector.getScaleFactor());
             }
             return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            if( has_zoom && camera_controller != null ) {
+                has_multitouch_start_zoom_factor = true;
+                multitouch_start_zoom_factor = camera_controller.getZoom();
+                has_smooth_zoom = true;
+                smooth_zoom = zoom_ratios.get(multitouch_start_zoom_factor)/100.0f;
+            }
+             else {
+                has_multitouch_start_zoom_factor = false;
+                multitouch_start_zoom_factor = 0;
+                has_smooth_zoom = false;
+                smooth_zoom = 1.0f;
+            }
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "onScaleEnd");
+            if( has_multitouch_start_zoom_factor && has_zoom && camera_controller != null && zoom_ratios.get(0) < 100 ) {
+                // when the minimum zoom is less than 1x, we should support snapping to 1x, so it's easy for the user to
+                // switch back to 1x zoom when using pinch zoom
+                int start_zoom = zoom_ratios.get(multitouch_start_zoom_factor);
+                final int end_zoom_factor = camera_controller.getZoom();
+                int end_zoom = zoom_ratios.get(end_zoom_factor);
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "start_zoom: " + start_zoom);
+                    Log.d(TAG, "end_zoom  : " + end_zoom);
+                }
+                if( end_zoom >= 90 && end_zoom <= 110 && start_zoom != 100 && end_zoom != 100 ) {
+                    int start_diff = start_zoom - 100;
+                    int end_diff = end_zoom - 100;
+                    if( Math.signum(start_diff) == Math.signum(end_diff) && Math.abs(end_diff) >= Math.abs(start_diff) ) {
+                        // we only want to snap when moving towards 1x, or have crossed over 1x
+                    }
+                    else {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "snapped pinch zoom to 1x zoom");
+                        int snapped_zoom = find1xZoom();
+                        zoomTo(snapped_zoom);
+                    }
+                }
+            }
+            has_multitouch_start_zoom_factor = false;
+            multitouch_start_zoom_factor = 0;
+            has_smooth_zoom = false;
+            smooth_zoom = 1.0f;
         }
     }
 
@@ -4043,15 +4103,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         int new_zoom_factor = 0;
         if( this.camera_controller != null && this.has_zoom ) {
             final int zoom_factor = camera_controller.getZoom();
-            float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+            float zoom_ratio;
+            if( has_smooth_zoom ) {
+                zoom_ratio = smooth_zoom;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "    use smooth_zoom: " + smooth_zoom + " instead of: " + this.zoom_ratios.get(zoom_factor)/100.0f);
+            }
+            else {
+                zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+            }
             zoom_ratio *= scale_factor;
+            if( MyDebug.LOG )
+                Log.d(TAG, "    zoom_ratio: " + zoom_ratio);
 
             new_zoom_factor = zoom_factor;
             if( zoom_ratio <= zoom_ratios.get(0)/100.0f ) {
                 new_zoom_factor = 0;
+                if( has_smooth_zoom )
+                    smooth_zoom = zoom_ratios.get(0)/100.0f;
             }
             else if( zoom_ratio >= zoom_ratios.get(max_zoom_factor)/100.0f ) {
                 new_zoom_factor = max_zoom_factor;
+                if( has_smooth_zoom )
+                    smooth_zoom = zoom_ratios.get(max_zoom_factor)/100.0f;
             }
             else {
                 // find the closest zoom level
@@ -4077,6 +4151,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         }
                     }
                 }
+                if( has_smooth_zoom )
+                    smooth_zoom = zoom_ratio;
             }
             if( MyDebug.LOG ) {
                 Log.d(TAG, "zoom_ratio is now " + zoom_ratio);
