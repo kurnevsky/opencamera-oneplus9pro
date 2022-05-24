@@ -2599,7 +2599,10 @@ public class CameraController2 extends CameraController {
                 for(int i=0;i<n_steps_below_one-1;i++) {
                     zoom *= scale_factor;
                     int zoom_ratio = (int)(zoom*100);
-                    camera_features.zoom_ratios.add(zoom_ratio);
+                    if( zoom_ratio > camera_features.zoom_ratios.get(0) ) {
+                        // on some devices (e.g., Pixel 6 Pro), the second entry would equal the first entry, due to the rounding fix above
+                        camera_features.zoom_ratios.add(zoom_ratio);
+                    }
                 }
 
                 // add values for 1.0f
