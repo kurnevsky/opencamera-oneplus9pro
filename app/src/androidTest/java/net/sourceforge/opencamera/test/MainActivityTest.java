@@ -10196,6 +10196,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "actual zoom = " + mPreview.getCameraController().getZoom());
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
+        // test we can find 1x zoom (which won't be the first entry for devices that exposure ultra-wide
+        // cameras via the zoom)
+        boolean found_1xzoom = false;
+        for(int i=0;i<max_zoom && !found_1xzoom;i++) {
+            if( mPreview.getZoomRatio(i) == 1.0f ) {
+                found_1xzoom = true;
+            }
+        }
+        assertTrue(found_1xzoom);
+
+        assertTrue(mPreview.getMinZoomRatio() <= 1.0f);
+        assertTrue(mPreview.getMaxZoomRatio() > 1.0f);
+
+        // check zoom values are non-decreasing
+        for(int i=0;i<max_zoom-1;i++) {
+            float zoom0 = mPreview.getZoomRatio(i);
+            float zoom1 = mPreview.getZoomRatio(i+1);
+            Log.d(TAG, "check zoom: " + zoom0 + " -> " + zoom1);
+            assertTrue(zoom1 >= zoom0);
+        }
+
         if( mPreview.supportsFocus() ) {
             assertFalse(mPreview.hasFocusArea());
             assertNull(mPreview.getCameraController().getFocusAreas());
@@ -10223,7 +10244,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mPreview.scaleZoom(0.5f);
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom);
+        // here test the zoom ratio values themselves rather than the indices, as we may have repeated zoom_ratios entries for 1x zoom
+        assertEquals( mPreview.getZoomRatio(mPreview.getCameraController().getZoom()), mPreview.getZoomRatio(zoom) );
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
         // test to max/min
@@ -10259,7 +10281,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         zoomSeekBar.setProgress(zoomSeekBar.getMax());
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom);
+        assertEquals(mPreview.getCameraController().getZoom(), 0);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
         // use volume keys to zoom in/out
@@ -10270,14 +10292,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_UP);
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom + 1);
+        assertEquals(mPreview.getCameraController().getZoom(), 1);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
         Log.d(TAG, "zoom out with volume keys");
         this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_DOWN);
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom);
+        assertEquals(mPreview.getCameraController().getZoom(), 0);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
         // now test with -/+ controls
@@ -10291,7 +10313,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.zoomIn();
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom + 1);
+        assertEquals(mPreview.getCameraController().getZoom(), 1);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
         if( mPreview.supportsFocus() ) {
             // check that focus areas cleared
@@ -10312,7 +10334,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.zoomOut();
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom);
+        assertEquals(mPreview.getCameraController().getZoom(), 0);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
         if( mPreview.supportsFocus() ) {
             // check that focus areas cleared
@@ -10340,14 +10362,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.zoomIn();
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom + 1);
+        assertEquals(mPreview.getCameraController().getZoom(), 1);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
 
         Log.d(TAG, "zoom out");
         mActivity.zoomOut();
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), zoom);
+        assertEquals(mPreview.getCameraController().getZoom(), 0);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
     }
 
@@ -10393,6 +10415,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final SeekBar zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
         assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
         int init_zoom = mPreview.getCameraController().getZoom();
+        float init_zoom_ratio = mPreview.getZoomRatio(init_zoom);
         int max_zoom = mPreview.getMaxZoom();
         zoomSeekBar.setProgress(0);
         this.getInstrumentation().waitForIdleSync();
@@ -10405,13 +10428,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         clickView(switchCameraButton);
         waitUntilCameraOpened();
         int new_cameraId = mPreview.getCameraId();
+        Log.d(TAG, "cameraId: " + cameraId);
+        Log.d(TAG, "new_cameraId: " + new_cameraId);
         assertTrue(cameraId != new_cameraId);
 
         max_zoom = mPreview.getMaxZoom();
         Log.d(TAG, "after pause and resume: compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + max_zoom);
         // as of Open Camera v1.43, zoom is reset when pause/resuming
         //assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
-        assertEquals(mPreview.getCameraController().getZoom(), init_zoom);
+        assertEquals(mPreview.getZoomRatio(mPreview.getCameraController().getZoom()), init_zoom_ratio);
         assertEquals(max_zoom - zoomSeekBar.getProgress(), mPreview.getCameraController().getZoom());
     }
 
