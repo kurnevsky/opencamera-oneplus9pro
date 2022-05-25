@@ -1862,11 +1862,11 @@ public class ImageSaver extends Thread {
         double sin_theta = Math.sin(level_angle_rad_abs);
         double denom = ( h0/w0 + tan_theta );
         double alt_denom = ( w0/h0 + tan_theta );
-        if( denom == 0.0 || denom < 1.0e-14 ) {
+        if( denom < 1.0e-14 ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "zero denominator?!");
         }
-        else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
+        else if( alt_denom < 1.0e-14 ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "zero alt denominator?!");
         }
