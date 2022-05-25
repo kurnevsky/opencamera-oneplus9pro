@@ -33,6 +33,7 @@ import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
+import net.sourceforge.opencamera.ui.MainUI;
 import net.sourceforge.opencamera.ui.PopupView;
 
 import android.annotation.SuppressLint;
@@ -8742,18 +8743,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "gallery right: " + galleryButton.getRight());
         Log.d(TAG, "gallery top: " + galleryButton.getTop());
 
+        final float scale = mActivity.getResources().getDisplayMetrics().density;
+        int expected_gap = (int) (MainUI.privacy_indicator_gap_dp * scale + 0.5f); // convert dps to pixels;
         if( mActivity.getSystemOrientation() == MainActivity.SystemOrientation.PORTRAIT ) {
             assertTrue(settingsButton.getBottom() > (int)(0.8*display_size.y));
             assertEquals(display_size.x, settingsButton.getRight());
             // position may be 1 coordinate different on some devices, e.g., Galaxy Nexus
-            assertEquals((double)(display_size.y-1), (double)(galleryButton.getBottom()), 1.0+1.0e-5);
-            assertEquals(display_size.x, galleryButton.getRight());
+            assertEquals((double)(display_size.y-1-expected_gap), (double)(galleryButton.getBottom()), 1.0+1.0e-5);
+            assertEquals(display_size.x-expected_gap, galleryButton.getRight());
         }
         else {
             assertTrue(settingsButton.getRight() > (int)(0.8*display_size.x));
             assertEquals(0, settingsButton.getTop());
-            assertEquals(display_size.x, galleryButton.getRight());
-            assertEquals(0, galleryButton.getTop());
+            assertEquals(display_size.x-expected_gap, galleryButton.getRight());
+            assertEquals(expected_gap, galleryButton.getTop());
         }
 
         {
@@ -8773,14 +8776,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(settingsButton.getBottom() < (int)(0.2*display_size.y));
             assertEquals(display_size.x, settingsButton.getRight());
             // position may be 1 coordinate different on some devices, e.g., Galaxy Nexus
-            assertEquals((double)(display_size.y-1), (double)(galleryButton.getBottom()), 1.0+1.0e-5);
-            assertEquals(display_size.x, galleryButton.getRight());
+            assertEquals((double)(display_size.y-1-expected_gap), (double)(galleryButton.getBottom()), 1.0+1.0e-5);
+            assertEquals(display_size.x-expected_gap, galleryButton.getRight());
         }
         else {
             assertTrue(settingsButton.getRight() < (int)(0.2*display_size.x));
             assertEquals(0, settingsButton.getTop());
-            assertEquals(display_size.x, galleryButton.getRight());
-            assertEquals(0, galleryButton.getTop());
+            assertEquals(display_size.x-expected_gap, galleryButton.getRight());
+            assertEquals(expected_gap, galleryButton.getTop());
         }
 
         assertFalse(mActivity.popupIsOpen());

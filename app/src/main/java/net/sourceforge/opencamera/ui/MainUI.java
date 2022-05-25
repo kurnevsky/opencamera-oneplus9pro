@@ -69,6 +69,7 @@ public class MainUI {
     private boolean view_rotate_animation;
     private float view_rotate_animation_start; // for MainActivity.lock_to_landscape==false
     private final static int view_rotate_animation_duration = 100; // duration in ms of the icon rotation animation
+    public final static int privacy_indicator_gap_dp = 24;
 
     private boolean immersive_mode;
     private boolean show_gui_photo = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
@@ -380,9 +381,9 @@ public class MainUI {
             if( ui_placement != UIPlacement.UIPLACEMENT_LEFT ) {
                 // if we did want to do this for UIPLACEMENT_LEFT for consistency, it'd be the
                 // "bottom" margin we need to change.
-                gallery_top_gap = (int) (24 * scale + 0.5f); // convert dps to pixels
+                gallery_top_gap = (int) (privacy_indicator_gap_dp * scale + 0.5f); // convert dps to pixels
             }
-            int privacy_indicator_gap = (int) (24 * scale + 0.5f); // convert dps to pixels
+            int privacy_indicator_gap = (int) (privacy_indicator_gap_dp * scale + 0.5f); // convert dps to pixels
             gallery_navigation_gap += privacy_indicator_gap;
         }
         test_navigation_gap = navigation_gap;
