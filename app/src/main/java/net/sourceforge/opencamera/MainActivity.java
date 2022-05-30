@@ -3867,7 +3867,7 @@ public class MainActivity extends AppCompatActivity {
 
             /** Runs on UI thread, after background work is complete.
              */
-            protected void onPostExecute(Bitmap thumbnail) {
+            private void onPostExecute(Bitmap thumbnail) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "onPostExecute");
                 if( update_gallery_future != null && update_gallery_future.isCancelled() ) {
