@@ -7807,6 +7807,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Take video with timelapse mode.
+     *  Fails on Android emulator (at least for Android 7.1 on VirtualScene camera).
      */
     public void testTakeVideoTimeLapse() throws InterruptedException {
         Log.d(TAG, "testTakeVideoTimeLapse");
