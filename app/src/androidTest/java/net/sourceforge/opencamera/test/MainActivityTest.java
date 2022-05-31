@@ -9475,7 +9475,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         assertNotNull(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-        if( !(isEmulator() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) ) {
+        if( !( isEmulator() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1 ) ) {
             // older Android emulator versions don't store exif info in photos
             assertNotNull(exif.getAttribute(ExifInterface.TAG_MAKE));
             assertNotNull(exif.getAttribute(ExifInterface.TAG_MODEL));
