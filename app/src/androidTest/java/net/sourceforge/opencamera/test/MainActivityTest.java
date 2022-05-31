@@ -4933,6 +4933,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         updateForSettings();
 
         boolean has_audio_control_button = true;
+        boolean has_zoom = mPreview.supportsZoom();
 
         View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
         View switchMultiCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_multi_camera);
@@ -4959,7 +4960,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -4977,7 +4978,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.GONE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -4996,7 +4997,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5014,7 +5015,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.GONE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5033,7 +5034,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5055,7 +5056,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5073,7 +5074,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.GONE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5093,7 +5094,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5123,7 +5124,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(popupButton.getVisibility(), View.GONE);
             assertEquals(trashButton.getVisibility(), View.GONE);
             assertEquals(shareButton.getVisibility(), View.GONE);
-            assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5141,7 +5142,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(popupButton.getVisibility(), View.VISIBLE);
             assertEquals(trashButton.getVisibility(), View.GONE);
             assertEquals(shareButton.getVisibility(), View.GONE);
-            assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+            assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5176,7 +5177,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(popupButton.getVisibility(), View.GONE);
             assertEquals(trashButton.getVisibility(), View.GONE);
             assertEquals(shareButton.getVisibility(), View.GONE);
-            assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5194,7 +5195,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(popupButton.getVisibility(), View.VISIBLE);
             assertEquals(trashButton.getVisibility(), View.GONE);
             assertEquals(shareButton.getVisibility(), View.GONE);
-            assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+            assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5223,7 +5224,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(popupButton.getVisibility(), View.GONE);
             assertEquals(trashButton.getVisibility(), View.GONE);
             assertEquals(shareButton.getVisibility(), View.GONE);
-            assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5248,6 +5249,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.apply();
         updateForSettings();
 
+        boolean has_zoom = mPreview.supportsZoom();
+
         View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
         View switchMultiCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_multi_camera);
         View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -5268,7 +5271,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5283,7 +5286,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.GONE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.GONE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.GONE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
@@ -5301,7 +5304,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
         assertEquals(shareButton.getVisibility(), View.GONE);
-        assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+        assertEquals(zoomSeekBar.getVisibility(), has_zoom ? View.VISIBLE : View.INVISIBLE);
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
