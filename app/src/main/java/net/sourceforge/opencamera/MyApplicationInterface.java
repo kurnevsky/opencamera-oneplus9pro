@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,8 +31,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.location.Address;
-import android.location.Geocoder;
+//import android.location.Address; // don't use until we have info for data privacy!
+//import android.location.Geocoder; // don't use until we have info for data privacy!
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.location.Location;
 import android.media.MediaMetadataRetriever;
@@ -1277,9 +1276,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return sharedPreferences.getString(PreferenceKeys.StampGPSFormatPreferenceKey, "preference_stamp_gpsformat_default");
     }
 
-    private String getStampGeoAddressPref() {
+    /*private String getStampGeoAddressPref() {
         return sharedPreferences.getString(PreferenceKeys.StampGeoAddressPreferenceKey, "preference_stamp_geo_address_no");
-    }
+    }*/
 
     private String getUnitsDistancePref() {
         return sharedPreferences.getString(PreferenceKeys.UnitsDistancePreferenceKey, "preference_units_distance_m");
@@ -2036,7 +2035,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         final String preference_stamp_timeformat = this.getStampTimeFormatPref();
         final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
         final String preference_units_distance = this.getUnitsDistancePref();
-        final String preference_stamp_geo_address = this.getStampGeoAddressPref();
+        //final String preference_stamp_geo_address = this.getStampGeoAddressPref();
         final boolean store_location = getGeotaggingPref();
         final boolean store_geo_direction = getGeodirectionPref();
         class SubtitleVideoTimerTask extends TimerTask {
@@ -2111,7 +2110,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     subtitles.append(datetime_stamp).append("\n");
 
                 if( gps_stamp.length() > 0 ) {
-                    Address address = null;
+                    /*Address address = null;
                     if( store_location && !preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
                         // try to find an address
                         if( main_activity.isAppPaused() ) {
@@ -2151,14 +2150,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             String addressLine = address.getAddressLine(i);
                             subtitles.append(addressLine).append("\n");
                         }
-                    }
+                    }*/
 
-                    if( address == null || preference_stamp_geo_address.equals("preference_stamp_geo_address_both") ) {
+                    //if( address == null || preference_stamp_geo_address.equals("preference_stamp_geo_address_both") )
+                    {
                         if( MyDebug.LOG )
                             Log.d(TAG, "display gps coords");
                         subtitles.append(gps_stamp).append("\n");
                     }
-                    else if( store_geo_direction ) {
+                    /*else if( store_geo_direction ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "not displaying gps coords, but need to display geo direction");
                         gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, preference_units_distance, false, null, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
@@ -2166,7 +2166,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             // don't log gps_stamp, in case of privacy!
                             subtitles.append(gps_stamp).append("\n");
                         }
-                    }
+                    }*/
                 }
 
                 if( subtitles.length() == 0 ) {
@@ -3285,7 +3285,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         String preference_stamp_dateformat = this.getStampDateFormatPref();
         String preference_stamp_timeformat = this.getStampTimeFormatPref();
         String preference_stamp_gpsformat = this.getStampGPSFormatPref();
-        String preference_stamp_geo_address = this.getStampGeoAddressPref();
+        //String preference_stamp_geo_address = this.getStampGeoAddressPref();
         String preference_units_distance = this.getUnitsDistancePref();
         boolean panorama_crop = sharedPreferences.getString(PreferenceKeys.PanoramaCropPreferenceKey, "preference_panorama_crop_on").equals("preference_panorama_crop_on");
         boolean store_location = getGeotaggingPref() && getLocation() != null;
@@ -3396,7 +3396,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         iso,
                         exposure_time,
                         zoom_factor,
-                        preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                        preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+                        //preference_stamp_geo_address,
+                        preference_units_distance,
                         panorama_crop,
                         store_location, location, store_geo_direction, geo_direction,
                         pitch_angle, store_ypr,
@@ -3439,7 +3441,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     iso,
                     exposure_time,
                     zoom_factor,
-                    preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                    preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+                    //preference_stamp_geo_address,
+                    preference_units_distance,
                     false, // panorama doesn't use this codepath
                     store_location, location, store_geo_direction, geo_direction,
                     pitch_angle, store_ypr,

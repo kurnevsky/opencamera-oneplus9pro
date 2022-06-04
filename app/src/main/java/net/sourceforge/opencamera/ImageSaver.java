@@ -37,8 +37,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
-import android.location.Address;
-import android.location.Geocoder;
+//import android.location.Address; // don't use until we have info for data privacy!
+//import android.location.Geocoder; // don't use until we have info for data privacy!
 import android.location.Location;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
@@ -163,7 +163,7 @@ public class ImageSaver extends Thread {
         final String preference_stamp_dateformat;
         final String preference_stamp_timeformat;
         final String preference_stamp_gpsformat;
-        final String preference_stamp_geo_address;
+        //final String preference_stamp_geo_address;
         final String preference_units_distance;
         final boolean panorama_crop; // used for panorama
         final boolean store_location;
@@ -194,7 +194,9 @@ public class ImageSaver extends Thread {
                 int iso,
                 long exposure_time,
                 float zoom_factor,
-                String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+                //String preference_stamp_geo_address,
+                String preference_units_distance,
                 boolean panorama_crop,
                 boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                 double pitch_angle, boolean store_ypr,
@@ -232,7 +234,7 @@ public class ImageSaver extends Thread {
             this.preference_stamp_dateformat = preference_stamp_dateformat;
             this.preference_stamp_timeformat = preference_stamp_timeformat;
             this.preference_stamp_gpsformat = preference_stamp_gpsformat;
-            this.preference_stamp_geo_address = preference_stamp_geo_address;
+            //this.preference_stamp_geo_address = preference_stamp_geo_address;
             this.preference_units_distance = preference_units_distance;
             this.panorama_crop = panorama_crop;
             this.store_location = store_location;
@@ -268,7 +270,9 @@ public class ImageSaver extends Thread {
                     this.iso,
                     this.exposure_time,
                     this.zoom_factor,
-                    this.preference_stamp, this.preference_textstamp, this.font_size, this.color, this.pref_style, this.preference_stamp_dateformat, this.preference_stamp_timeformat, this.preference_stamp_gpsformat, this.preference_stamp_geo_address, this.preference_units_distance,
+                    this.preference_stamp, this.preference_textstamp, this.font_size, this.color, this.pref_style, this.preference_stamp_dateformat, this.preference_stamp_timeformat, this.preference_stamp_gpsformat,
+                    //this.preference_stamp_geo_address,
+                    this.preference_units_distance,
                     this.panorama_crop, this.store_location, this.location, this.store_geo_direction, this.geo_direction,
                     this.pitch_angle, this.store_ypr,
                     this.custom_tag_artist,
@@ -577,7 +581,9 @@ public class ImageSaver extends Thread {
                           int iso,
                           long exposure_time,
                           float zoom_factor,
-                          String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                          String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+                          //String preference_stamp_geo_address,
+                          String preference_units_distance,
                           boolean panorama_crop,
                           boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                           double pitch_angle, boolean store_ypr,
@@ -608,7 +614,9 @@ public class ImageSaver extends Thread {
                 iso,
                 exposure_time,
                 zoom_factor,
-                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+                //preference_stamp_geo_address,
+                preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 pitch_angle, store_ypr,
                 custom_tag_artist,
@@ -650,7 +658,9 @@ public class ImageSaver extends Thread {
                 0,
                 0,
                 1.0f,
-                null, null, 0, 0, null, null, null, null, null, null,
+                null, null, 0, 0, null, null, null, null,
+                //null,
+                null,
                 false, false, null, false, 0.0,
                 0.0, false,
                 null, null,
@@ -675,7 +685,9 @@ public class ImageSaver extends Thread {
                            int iso,
                            long exposure_time,
                            float zoom_factor,
-                           String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                           String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+                           //String preference_stamp_geo_address,
+                           String preference_units_distance,
                            boolean panorama_crop,
                            boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                            double pitch_angle, boolean store_ypr,
@@ -704,7 +716,9 @@ public class ImageSaver extends Thread {
                 iso,
                 exposure_time,
                 zoom_factor,
-                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+                //preference_stamp_geo_address,
+                preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 pitch_angle, store_ypr,
                 custom_tag_artist,
@@ -783,7 +797,9 @@ public class ImageSaver extends Thread {
                               int iso,
                               long exposure_time,
                               float zoom_factor,
-                              String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                              String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+                              //String preference_stamp_geo_address,
+                              String preference_units_distance,
                               boolean panorama_crop,
                               boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                               double pitch_angle, boolean store_ypr,
@@ -816,7 +832,9 @@ public class ImageSaver extends Thread {
                 iso,
                 exposure_time,
                 zoom_factor,
-                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+                //preference_stamp_geo_address,
+                preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 pitch_angle, store_ypr,
                 custom_tag_artist,
@@ -927,7 +945,9 @@ public class ImageSaver extends Thread {
                 0,
                 0,
                 1.0f,
-                null, null, 0, 0, null, null, null, null, null, null,
+                null, null, 0, 0, null, null, null, null,
+                //null,
+                null,
                 false, false, null, false, 0.0,
                 0.0, false,
                 null, null,
@@ -2176,7 +2196,7 @@ public class ImageSaver extends Thread {
                     if( gps_stamp.length() > 0 ) {
                         // don't log gps_stamp, in case of privacy!
 
-                        Address address = null;
+                        /*Address address = null;
                         if( request.store_location && !request.preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
                             boolean block_geocoder;
                             synchronized(this) {
@@ -2213,9 +2233,10 @@ public class ImageSaver extends Thread {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder not present");
                             }
-                        }
+                        }*/
 
-                        if( address == null || request.preference_stamp_geo_address.equals("preference_stamp_geo_address_both") ) {
+                        //if( address == null || request.preference_stamp_geo_address.equals("preference_stamp_geo_address_both") )
+                        {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "display gps coords");
                             // want GPS coords (either in addition to the address, or we don't have an address)
@@ -2227,7 +2248,7 @@ public class ImageSaver extends Thread {
                                 stamp_string = gps_stamp + "\n" + stamp_string;
                             ypos -= diff_y;
                         }
-                        else if( request.store_geo_direction ) {
+                        /*else if( request.store_geo_direction ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "not displaying gps coords, but need to display geo direction");
                             // we are displaying an address instead of GPS coords, but we still need to display the geo direction
@@ -2241,9 +2262,9 @@ public class ImageSaver extends Thread {
                                     stamp_string = gps_stamp + "\n" + stamp_string;
                                 ypos -= diff_y;
                             }
-                        }
+                        }*/
 
-                        if( address != null ) {
+                        /*if( address != null ) {
                             for(int i=0;i<=address.getMaxAddressLineIndex();i++) {
                                 // write in reverse order
                                 String addressLine = address.getAddressLine(address.getMaxAddressLineIndex()-i);
@@ -2254,7 +2275,7 @@ public class ImageSaver extends Thread {
                                     stamp_string = addressLine + "\n" + stamp_string;
                                 ypos -= diff_y;
                             }
-                        }
+                        }*/
                     }
                 }
                 if( text_stamp ) {
