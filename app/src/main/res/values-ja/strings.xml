@@ -835,10 +835,8 @@
     <string name="preference_camera_api_old">従来のカメラ用API</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
-    <string name="preference_audio_control_summary">音または音声コマンドに反応して撮影/録画を行います。
+    <string name="preference_audio_control_summary">音に反応して撮影/録音します。
         この機能をオンにした場合、画面上に表示されるマイクボタンを使用してリスニングをスタート/ストップします。
-        注意:音声コマンドにはAndroidの音声認識サービスを使用します。このオプションを使用する場合、音声データは
-        音声認識のためリモートサーバーへ送信されます。
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

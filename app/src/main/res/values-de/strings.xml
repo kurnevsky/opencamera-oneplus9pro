@@ -889,10 +889,8 @@
     <string name="preference_camera_api_old">Original Camera-API</string>
     <string name="preference_camera_api_camera2">Camera2-API</string>
 
-    <string name="preference_audio_control_summary">Foto/Video aufnehmen, wenn ein Geräusch oder Sprachbefehl erkannt wird.
+    <string name="preference_audio_control_summary">Foto/Video aufnehmen, wenn ein Geräusch erkannt wird.
         Wenn aktiviert, nutze die Mikrofon-Taste auf dem Bildschirm, um die Erkennung zu starten/stoppen.
-        Beachte, dass die Option den Android Spracherkennungsdienst verwendet: Durch die Aktivierung ist es möglich, dass Audiodaten
-        an entfernte Server gesendet werden, um die Spracherkennung durchzuführen.
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     private TextFormatter textFormatter;
     private SoundPoolManager soundPoolManager;
     private MagneticSensor magneticSensor;
-    private SpeechControl speechControl;
+    //private SpeechControl speechControl;
 
     private Preview preview;
     private OrientationEventListener orientationEventListener;
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
         textFormatter = new TextFormatter(this);
         soundPoolManager = new SoundPoolManager(this);
         magneticSensor = new MagneticSensor(this);
-        speechControl = new SpeechControl(this);
+        //speechControl = new SpeechControl(this);
 
         // determine whether we support Camera2 API
         initCamera2Support();
@@ -1383,7 +1383,7 @@ public class MainActivity extends AppCompatActivity {
         // if BLE remote control is enabled, then start the background BLE service
         bluetoothRemoteControl.startRemoteControl();
 
-        speechControl.initSpeechRecognizer();
+        //speechControl.initSpeechRecognizer();
         initLocation();
         initGyroSensors();
         applicationInterface.getImageSaver().onResume();
@@ -1468,7 +1468,7 @@ public class MainActivity extends AppCompatActivity {
         orientationEventListener.disable();
         bluetoothRemoteControl.stopRemoteControl();
         freeAudioListener(false);
-        speechControl.stopSpeechRecognizer();
+        //speechControl.stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
         applicationInterface.stopPanorama(true); // in practice not needed as we should stop panorama when camera is closed, but good to do it explicitly here, before disabling the gyro sensors
         applicationInterface.getGyroSensor().disableSensors();
@@ -1990,7 +1990,7 @@ public class MainActivity extends AppCompatActivity {
         this.closePopup();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
-        if( audio_control.equals("voice") && speechControl.hasSpeechRecognition() ) {
+        /*if( audio_control.equals("voice") && speechControl.hasSpeechRecognition() ) {
             if( speechControl.isStarted() ) {
                 speechControl.stopListening();
             }
@@ -2014,7 +2014,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        else if( audio_control.equals("noise") ){
+        else*/ if( audio_control.equals("noise") ){
             if( audio_listener != null ) {
                 freeAudioListener(false);
             }
@@ -2871,12 +2871,16 @@ public class MainActivity extends AppCompatActivity {
         checkDisableGUIIcons();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if( sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none") ) {
+        String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
+        // better to only display the audio control icon if it matches specific known supported types
+        // (important now that "voice" is no longer supported)
+        //if( !audio_control.equals("voice") && !audio_control.equals("noise") ) {
+        if( !audio_control.equals("noise") ) {
             View speechRecognizerButton = findViewById(R.id.audio_control);
             speechRecognizerButton.setVisibility(View.GONE);
         }
 
-        speechControl.initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
+        //speechControl.initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 
         // we no longer call initLocation() here (for having enabled or disabled geotagging), as that's
         // done in setWindowFlagsForCamera() - important not to call it here as well, otherwise if
@@ -5811,10 +5815,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean hasAudioControl() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
-        if( audio_control.equals("voice") ) {
+        /*if( audio_control.equals("voice") ) {
             return speechControl.hasSpeechRecognition();
         }
-        else if( audio_control.equals("noise") ) {
+        else*/ if( audio_control.equals("noise") ) {
             return true;
         }
         return false;
@@ -5827,10 +5831,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void stopAudioListeners() {
         freeAudioListener(true);
-        if( speechControl.hasSpeechRecognition() ) {
+        /*if( speechControl.hasSpeechRecognition() ) {
             // no need to free the speech recognizer, just stop it
             speechControl.stopListening();
-        }
+        }*/
     }
 
     public void initLocation() {

@@ -992,11 +992,9 @@
     <string-array name="preference_audio_control_entries">
         <item>@string/preference_audio_control_none</item>
         <item>@string/preference_audio_control_noise</item>
-        <item>@string/preference_audio_control_voice</item>
     </string-array>
     <string-array name="preference_audio_control_values">
         <item>none</item>
         <item>noise</item>
-        <item>voice</item>
     </string-array>
 </resources>

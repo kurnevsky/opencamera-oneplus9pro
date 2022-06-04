@@ -893,10 +893,8 @@
     <string name="preference_camera_api_old">原本的 camera API</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
-    <string name="preference_audio_control_summary">當偵測到聲音或是或音訊指令時拍照/錄影。
+    <string name="preference_audio_control_summary">檢測到聲音時拍照/錄像。
         當啟用時，使用螢幕上的麥克風按鈕來開始/停止監聽。
-        注意音訊指令選項會使用 Android 語音辨識服務：當使用這個選項時，
-音訊資料可能會可能會被傳送到遠端伺服器來進行語音辨識。
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

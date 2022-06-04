@@ -811,10 +811,8 @@
     <string name="preference_camera_api_old">Oryginalny interfejs (Camera API)</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
-    <string name="preference_audio_control_summary">Rób zdjęcia/nagrywaj filmy po wykryciu hałasu lub na polecenie głosowe.
+    <string name="preference_audio_control_summary">Rób zdjęcia/nagrywaj filmy po wykryciu hałasu.
         Po włączeniu użyj przycisku mikrofonu na ekranie, aby rozpocząć/zatrzymać nasłuchiwanie.
-        Zwróć uwagę, że opcja polecenia głosowego korzysta z usługi rozpoznawania mowy systemu Android: podczas korzystania z tej opcji dane dźwiękowe prawdopodobnie będą
-        wysyłane do zdalnych serwerów w celu wykonania rozpoznawania mowy.
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

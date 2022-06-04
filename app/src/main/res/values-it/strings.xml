@@ -892,10 +892,8 @@
     <string name="preference_camera_api_old">API originale della fotocamera</string>
     <string name="preference_camera_api_camera2">API Camera2</string>
 
-    <string name="preference_audio_control_summary">Scatta foto/video quando viene rilevato un rumore, o su comando vocale.
+    <string name="preference_audio_control_summary">Scatta foto/video quando viene rilevato un rumore.
         Quando è abilitato, usa il pulsante del microfono sullo schermo per avviare/interrompere l\'ascolto.
-        Nota che l\'opzione comando vocale utilizza il servizio di riconoscimento vocale di Android: quando si utilizza questa
-        opzione, i dati audio possono essere inviati a server remoti per eseguire il riconoscimento vocale.
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

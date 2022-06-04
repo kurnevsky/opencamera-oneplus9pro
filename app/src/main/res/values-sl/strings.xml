@@ -894,10 +894,8 @@
     <string name="preference_camera_api_old">Izvirni API fotoaparata</string>
     <string name="preference_camera_api_camera2">API Camera2</string>
 
-    <string name="preference_audio_control_summary">Posnemite fotografijo/videposnetek, ko naprava zazna zvok ali glasovni ukaz.
+    <string name="preference_audio_control_summary">Posnemite fotografijo/videposnetek, ko naprava zazna zvok.
         Ko je omogočeno, uporabite zaslonski gumb za mikrofon, da vklopite/izklopite zaznavo zvoka.
-        Upoštevajte, da  možnost glasovnega ukaza uporablja Androidovo storitev za prepoznavanje govora: med uporabo te možnosti se bodo
-        podatki verjetno poslali na oddaljene strežnike, da se opravi prepoznavanje govora.
         \n%s</string>
 
     <!-- beware of string being too long to display! -->

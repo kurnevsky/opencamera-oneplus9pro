@@ -3230,10 +3230,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "visibility is now: " + audioControlButton.getVisibility());
         assertEquals(audioControlButton.getVisibility(), View.GONE);
 
-        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
+        /*editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
         editor.apply();
         updateForSettings();
-        assertEquals(audioControlButton.getVisibility(), View.VISIBLE);
+        assertEquals(audioControlButton.getVisibility(), View.VISIBLE);*/
 
         editor.putString(PreferenceKeys.AudioControlPreferenceKey, "none");
         editor.apply();
@@ -4908,7 +4908,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
+        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "noise");
         editor.apply();
         updateForSettings();
 
@@ -4928,7 +4928,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_gui");
-        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
+        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "noise");
         editor.apply();
         updateForSettings();
 
@@ -5553,7 +5553,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
+        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "noise");
         editor.apply();
         updateForSettings();
 
@@ -6486,7 +6486,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
+        editor.putString(PreferenceKeys.AudioControlPreferenceKey, "noise");
         editor.apply();
         updateForSettings();
 

@@ -892,10 +892,8 @@
     <string name="preference_camera_api_old">Оригинальный API камеры</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
-    <string name="preference_audio_control_summary">Снимать фото/видео при обнаружении шума или по голосовой команде.
+    <string name="preference_audio_control_summary">Снимать фото/видео при обнаружении шума.
         Если включено, используйте экранную кнопку микрофона для запуска/остановки слушания.
-        Важно: настройка голосовой команды использует службу распознавания речи Android. При использовании этой опции аудиоданные
-        могут быть переданы на удаленные серверы для распознавания речи.
         \n%s</string>
 
     <!-- beware of string being too long to display! -->
