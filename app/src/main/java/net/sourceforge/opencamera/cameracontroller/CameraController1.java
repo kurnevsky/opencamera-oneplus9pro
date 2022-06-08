@@ -1611,17 +1611,22 @@ public class CameraController1 extends CameraController {
     }
 
     public void setFaceDetectionListener(final CameraController.FaceDetectionListener listener) {
-        class CameraFaceDetectionListener implements Camera.FaceDetectionListener {
-            @Override
-            public void onFaceDetection(Camera.Face[] camera_faces, Camera camera) {
-                Face [] faces = new Face[camera_faces.length];
-                for(int i=0;i<camera_faces.length;i++) {
-                    faces[i] = new Face(camera_faces[i].score, camera_faces[i].rect);
+        if( listener != null ) {
+            class CameraFaceDetectionListener implements Camera.FaceDetectionListener {
+                @Override
+                public void onFaceDetection(Camera.Face[] camera_faces, Camera camera) {
+                    Face [] faces = new Face[camera_faces.length];
+                    for(int i=0;i<camera_faces.length;i++) {
+                        faces[i] = new Face(camera_faces[i].score, camera_faces[i].rect);
+                    }
+                    listener.onFaceDetection(faces);
                 }
-                listener.onFaceDetection(faces);
             }
+            camera.setFaceDetectionListener(new CameraFaceDetectionListener());
         }
-        camera.setFaceDetectionListener(new CameraFaceDetectionListener());
+        else {
+            camera.setFaceDetectionListener(null);
+        }
     }
 
     @Override
